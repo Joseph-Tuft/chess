@@ -47,19 +47,13 @@ public class ChessPiece {
         return type;
     }
 
-    /**
-     * Calculates all the positions a chess piece can move to
-     * Does not take into account moves that are illegal due to leaving the king in
-     * danger
-     *
-     * @return Collection of valid moves
-     */
+
 
     /**
      * Checks to see if a move is valid based only of the square itself and not the spaces between the piece
      * and the new move
      *
-     * @return
+     * @return true or false if the square allows a valid move
      */
     public Boolean isSquareValid(ChessPosition newMove, ChessPiece myPiece, ChessBoard board){
         if (newMove.getColumn() >= 1 && newMove.getColumn() <= 8){
@@ -68,9 +62,7 @@ public class ChessPiece {
                 if (opponent == null){
                     return true;
                 }
-                else if (myPiece.getTeamColor() != opponent.getTeamColor()){
-                    return true;
-                }
+                else return myPiece.getTeamColor() != opponent.getTeamColor();
             }
         }
         return false;
@@ -88,13 +80,33 @@ public class ChessPiece {
     }
 
     public void bishopMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
-        ChessPiece piece = board.getPiece(myPosition);
         int[][] directions = {{1,1},{1,-1},{-1,-1},{-1,1}};
         for (int[] direction : directions){
             brqHelper(direction, myPosition, board, moves);
         }
     }
 
+    public void queenMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
+        int[][] directions = {{1,1},{1,-1},{-1,-1},{-1,1},{0,1},{0,-1},{-1,0},{1,0}};
+        for (int[] direction : directions){
+            brqHelper(direction, myPosition, board, moves);
+        }
+    }
+
+    public void rookMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
+        int[][] directions = {{0,1},{0,-1},{-1,0},{1,0}};
+        for (int[] direction : directions){
+            brqHelper(direction, myPosition, board, moves);
+        }
+    }
+
+    /**
+     * Calculates all the positions a chess piece can move to
+     * Does not take into account moves that are illegal due to leaving the king in
+     * danger
+     *
+     * @return Collection of valid moves
+     */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
        ChessPiece piece = board.getPiece(myPosition);
        List<ChessMove> moves = new ArrayList<>();
@@ -102,6 +114,14 @@ public class ChessPiece {
            bishopMoves(board, myPosition, moves);
            return moves;
        }
+       if (piece.getPieceType() == PieceType.ROOK) {
+            rookMoves(board, myPosition, moves);
+            return moves;
+        }
+        if (piece.getPieceType() == PieceType.QUEEN) {
+            queenMoves(board, myPosition, moves);
+            return moves;
+        }
        return null;
     }
 }
