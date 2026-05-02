@@ -3,6 +3,7 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a single chess piece
@@ -32,6 +33,21 @@ public class ChessPiece {
         ROOK,
         PAWN
     }
+
+    private static final Map<PieceType, int[][]> DIRECTIONS = Map.of(
+            PieceType.KING, new int[][]{
+                    { 1, 0},{ 1, 1},{ 1,-1},{0, 1},
+                    { 0,-1},{-1,-1},{-1, 0},{-1,1}},
+            PieceType.QUEEN, new int[][]{
+                    {1,1},{1,-1},{-1,-1},{-1,1},
+                    {0,1},{0,-1},{-1, 0},{ 1,0}},
+            PieceType.ROOK, new int[][]{
+                    {0,1},{0,-1},{-1,0},{1,0}},
+            PieceType.BISHOP, new int[][]{
+
+
+            }
+    )
 
     /**
      * @return Which team this chess piece belongs to
@@ -86,6 +102,13 @@ public class ChessPiece {
         }
     }
 
+    public void rookMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
+        int[][] directions = {{0,1},{0,-1},{-1,0},{1,0}};
+        for (int[] direction : directions){
+            brqHelper(direction, myPosition, board, moves);
+        }
+    }
+
     public void queenMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
         int[][] directions = {{1,1},{1,-1},{-1,-1},{-1,1},{0,1},{0,-1},{-1,0},{1,0}};
         for (int[] direction : directions){
@@ -93,11 +116,19 @@ public class ChessPiece {
         }
     }
 
-    public void rookMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
-        int[][] directions = {{0,1},{0,-1},{-1,0},{1,0}};
-        for (int[] direction : directions){
-            brqHelper(direction, myPosition, board, moves);
+    public void knightMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
+        int[][] directions = {{2,1},{2,-1},{1,2},{1,-2},{-1,2},{-1,-2},{-2,1},{-2,-1}};
+        ChessPiece piece = board.getPiece(myPosition);
+        for (int[] d : directions){
+            ChessPosition newPos = new ChessPosition(myPosition.getRow()+d[0], myPosition.getColumn()+d[1]);
+            if (isSquareValid(newPos, piece, board)){
+                moves.add(new ChessMove(myPosition, newPos, null));
+            }
         }
+    }
+
+    public void pawnMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
+        int[][] directions
     }
 
     /**
@@ -122,6 +153,11 @@ public class ChessPiece {
             queenMoves(board, myPosition, moves);
             return moves;
         }
+        if (piece.getPieceType() == PieceType.KNIGHT) {
+            knightMoves(board, myPosition, moves);
+            return moves;
+        }
+
        return null;
     }
 }
