@@ -44,10 +44,13 @@ public class ChessPiece {
             PieceType.ROOK, new int[][]{
                     {0,1},{0,-1},{-1,0},{1,0}},
             PieceType.BISHOP, new int[][]{
-
-
-            }
-    )
+                    {1,1},{1,-1},{-1,-1},{-1,1}},
+            PieceType.KNIGHT, new int[][]{
+                    { 2,1},{ 2,-1},{ 1,2},{ 1,-2},
+                    {-1,2},{-1,-2},{-2,1},{-2,-1}},
+            PieceType.PAWN, new int[][]{
+                    {0,1},{0,2},{1,1},{-1,1}}
+    );
 
     /**
      * @return Which team this chess piece belongs to
@@ -128,7 +131,36 @@ public class ChessPiece {
     }
 
     public void pawnMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
-        int[][] directions
+        ChessPiece piece = board.getPiece(myPosition);
+        ChessGame.TeamColor color = piece.getTeamColor();
+        int[][] directions;
+        if (color == ChessGame.TeamColor.WHITE){
+            directions = new int[][] {{1,0},{2,0},{1,1},{1,-1}};
+        }
+        else {
+            directions = new int[][] {{-1,0},{-2,0},{-1,1},{-1,-1}};
+        }
+        for (int[] d : directions){
+            ChessPosition newPos = new ChessPosition(myPosition.getRow()+d[0], myPosition.getColumn()+d[1]);
+            //Move forward
+            if (d[1]==0 && isSquareValid(newPos, piece, board) && board.getPiece(newPos) == null) {
+                    if (Math.abs(d[0]) == 2) {
+                        ChessPosition intermediate = new ChessPosition(myPosition.getRow() + d[0] /2, myPosition.getColumn() + d[1]);
+                        if (board.getPiece(intermediate) == null) {
+                            if (d[0] < 0 && myPosition.getRow() == 7) {
+                                moves.add(new ChessMove(myPosition, newPos, null));
+                            } else if (d[0] > 0 && myPosition.getRow() == 2) {
+                                moves.add(new ChessMove(myPosition, newPos, null));
+                            }
+                        }
+                    } else {
+                        moves.add(new ChessMove(myPosition, newPos, null));
+                    }
+            //Capture diagonal
+            } else if (d[1] != 0 && isSquareValid(newPos, piece, board) && board.getPiece(newPos) != null){
+                moves.add(new ChessMove(myPosition, newPos, null));
+            }
+        }
     }
 
     /**
@@ -155,6 +187,10 @@ public class ChessPiece {
         }
         if (piece.getPieceType() == PieceType.KNIGHT) {
             knightMoves(board, myPosition, moves);
+            return moves;
+        }
+        if (piece.getPieceType() == PieceType.PAWN) {
+            pawnMoves(board, myPosition, moves);
             return moves;
         }
 
