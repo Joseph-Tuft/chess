@@ -141,6 +141,20 @@ public class ChessPiece {
         }
     }
 
+    public void checkPromoteAndAdd( int[] d, ChessPosition myPosition, ChessPosition newPos, List<ChessMove> moves){
+        int row = myPosition.getRow();
+        // Equation is zero only if piece is promoted (row = 7 and d[0] = 1 or row = 2 and d[0] = -1)
+        int promote = (d[0]-1)*(row-2)-(d[0]+1)*(row-7);
+        if (promote == 0){
+            moves.add(new ChessMove(myPosition, newPos, PieceType.BISHOP));
+            moves.add(new ChessMove(myPosition, newPos, PieceType.ROOK));
+            moves.add(new ChessMove(myPosition, newPos, PieceType.QUEEN));
+            moves.add(new ChessMove(myPosition, newPos, PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(myPosition, newPos, null));
+        }
+    }
+
     public void pawnMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
         ChessPiece piece = board.getPiece(myPosition);
         ChessGame.TeamColor color = piece.getTeamColor();
@@ -165,11 +179,11 @@ public class ChessPiece {
                             }
                         }
                     } else {
-                        moves.add(new ChessMove(myPosition, newPos, null));
+                        checkPromoteAndAdd(d, myPosition, newPos, moves);
                     }
             //Capture diagonal
             } else if (d[1] != 0 && isSquareValid(newPos, piece, board) && board.getPiece(newPos) != null){
-                moves.add(new ChessMove(myPosition, newPos, null));
+                checkPromoteAndAdd(d, myPosition, newPos, moves);
             }
         }
     }
