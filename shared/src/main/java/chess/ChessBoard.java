@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -35,12 +38,73 @@ public class ChessBoard {
         return board[position.getRow() - 1][position.getColumn() - 1];
     }
 
+    public void removePiece(ChessPosition position) {
+        board[position.getRow() - 1][position.getColumn() - 1] = null;
+    }
+
+    public void clearBoard(){
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j < 8; j++){
+                board[i][j] = null;
+            }
+        }
+    }
+
+    public void placePawnRow(ChessGame.TeamColor color){
+        int row;
+
+        if (color == ChessGame.TeamColor.BLACK){row = 7;}
+        else {row = 2;}
+        for (int col = 1; col <= 8; col ++){
+            addPiece(new ChessPosition(row, col), new ChessPiece(color, ChessPiece.PieceType.PAWN));
+        }
+    }
+
+    public void placeBackRow(ChessGame.TeamColor color){
+        int row;
+        if (color == ChessGame.TeamColor.BLACK){row = 8;}
+        else {row = 1;}
+        for (int col = 1; col <= 9; col ++){
+            if (col == 1 || col == 8){
+                addPiece(new ChessPosition(row, col), new ChessPiece(color, ChessPiece.PieceType.ROOK));
+            }
+            if (col == 2 || col == 7){
+                addPiece(new ChessPosition(row, col), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
+            }
+            if (col == 3 || col == 6){
+                addPiece(new ChessPosition(row, col), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
+            }
+            if (col == 4){
+                addPiece(new ChessPosition(row, col), new ChessPiece(color, ChessPiece.PieceType.QUEEN));
+            }
+            if (col == 5){
+                addPiece(new ChessPosition(row, col), new ChessPiece(color, ChessPiece.PieceType.KING));
+            }
+        }
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        clearBoard();
+        placePawnRow(ChessGame.TeamColor.BLACK);
+        placePawnRow(ChessGame.TeamColor.WHITE);
+        placeBackRow(ChessGame.TeamColor.BLACK);
+        placeBackRow(ChessGame.TeamColor.WHITE);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ChessBoard that)) {
+            return false;
+        }
+        return Objects.deepEquals(board, that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
+    }
 }
