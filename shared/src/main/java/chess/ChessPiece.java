@@ -130,6 +130,17 @@ public class ChessPiece {
         }
     }
 
+    public void kingMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
+        int[][] directions = {{1,1},{1,-1},{-1,-1},{-1,1},{0,1},{0,-1},{-1,0},{1,0}};
+        ChessPiece piece = board.getPiece(myPosition);
+        for (int[] d : directions){
+            ChessPosition newPos = new ChessPosition(myPosition.getRow()+d[0], myPosition.getColumn()+d[1]);
+            if (isSquareValid(newPos, piece, board)){
+                moves.add(new ChessMove(myPosition, newPos, null));
+            }
+        }
+    }
+
     public void pawnMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
         ChessPiece piece = board.getPiece(myPosition);
         ChessGame.TeamColor color = piece.getTeamColor();
@@ -163,6 +174,7 @@ public class ChessPiece {
         }
     }
 
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -187,6 +199,10 @@ public class ChessPiece {
         }
         if (piece.getPieceType() == PieceType.KNIGHT) {
             knightMoves(board, myPosition, moves);
+            return moves;
+        }
+        if (piece.getPieceType() == PieceType.KING) {
+            kingMoves(board, myPosition, moves);
             return moves;
         }
         if (piece.getPieceType() == PieceType.PAWN) {
