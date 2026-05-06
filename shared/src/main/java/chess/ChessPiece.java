@@ -84,41 +84,33 @@ public class ChessPiece {
         return false;
     }
 
-    public void brqHelper(int[] direction, ChessPosition startPos, ChessBoard board, List<ChessMove> moves){
+    /**
+     * Updates moves list to contain all the moves for a rook, bishop, or queen
+     *
+     */
+    public void brqMoves(ChessBoard board, ChessPosition startPos, List<ChessMove> moves){
         ChessPiece piece = board.getPiece(startPos);
-        ChessPosition currPos = startPos;
-        ChessPosition nextPos = new ChessPosition(currPos.getRow()+direction[0], currPos.getColumn()+direction[1]);
-        while (isSquareValid(nextPos, piece, board) && (board.getPiece(currPos) == null  || currPos == startPos)){
-            moves.add(new ChessMove(startPos, nextPos, null));
-            currPos = nextPos;
-            nextPos = new ChessPosition(currPos.getRow()+direction[0], currPos.getColumn()+direction[1]);
+        int[][] directions = DIRECTIONS.get(piece.getPieceType());
+        ChessPosition currPos;
+        ChessPosition nextPos;
+        for (int[] d : directions) {
+            currPos = startPos;
+            nextPos = new ChessPosition(currPos.getRow() + d[0], currPos.getColumn() + d[1]);
+            while (isSquareValid(nextPos, piece, board) && (board.getPiece(currPos) == null || currPos == startPos)) {
+                moves.add(new ChessMove(startPos, nextPos, null));
+                currPos = nextPos;
+                nextPos = new ChessPosition(currPos.getRow() + d[0], currPos.getColumn() + d[1]);
+            }
         }
     }
 
-    public void bishopMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
-        int[][] directions = {{1,1},{1,-1},{-1,-1},{-1,1}};
-        for (int[] direction : directions){
-            brqHelper(direction, myPosition, board, moves);
-        }
-    }
-
-    public void rookMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
-        int[][] directions = {{0,1},{0,-1},{-1,0},{1,0}};
-        for (int[] direction : directions){
-            brqHelper(direction, myPosition, board, moves);
-        }
-    }
-
-    public void queenMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
-        int[][] directions = {{1,1},{1,-1},{-1,-1},{-1,1},{0,1},{0,-1},{-1,0},{1,0}};
-        for (int[] direction : directions){
-            brqHelper(direction, myPosition, board, moves);
-        }
-    }
-
-    public void knightMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
-        int[][] directions = {{2,1},{2,-1},{1,2},{1,-2},{-1,2},{-1,-2},{-2,1},{-2,-1}};
+    /**
+     * Updates moves list to contain all the moves for a king or knight
+     *
+     */
+    public void knMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
         ChessPiece piece = board.getPiece(myPosition);
+        int[][] directions = DIRECTIONS.get(piece.getPieceType());
         for (int[] d : directions){
             ChessPosition newPos = new ChessPosition(myPosition.getRow()+d[0], myPosition.getColumn()+d[1]);
             if (isSquareValid(newPos, piece, board)){
@@ -127,17 +119,11 @@ public class ChessPiece {
         }
     }
 
-    public void kingMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
-        int[][] directions = {{1,1},{1,-1},{-1,-1},{-1,1},{0,1},{0,-1},{-1,0},{1,0}};
-        ChessPiece piece = board.getPiece(myPosition);
-        for (int[] d : directions){
-            ChessPosition newPos = new ChessPosition(myPosition.getRow()+d[0], myPosition.getColumn()+d[1]);
-            if (isSquareValid(newPos, piece, board)){
-                moves.add(new ChessMove(myPosition, newPos, null));
-            }
-        }
-    }
-
+    /**
+     * Checks if the pawn is moving to the end of the board. If so, allows promotions otherwise adds
+     * move without promotion.
+     * ASSUMES move has already been checked to be a valid move.
+     */
     public void checkPromoteAndAdd( int[] d, ChessPosition myPosition, ChessPosition newPos, List<ChessMove> moves){
         int row = myPosition.getRow();
         // Equation is zero only if piece is promoted (row = 7 and d[0] = 1 or row = 2 and d[0] = -1)
@@ -152,6 +138,10 @@ public class ChessPiece {
         }
     }
 
+    /**
+     * Updates moves list to contain all the moves for a pawn
+     *
+     */
     public void pawnMoves(ChessBoard board, ChessPosition myPosition, List<ChessMove> moves){
         ChessPiece piece = board.getPiece(myPosition);
         ChessGame.TeamColor color = piece.getTeamColor();
@@ -197,23 +187,23 @@ public class ChessPiece {
        ChessPiece piece = board.getPiece(myPosition);
        List<ChessMove> moves = new ArrayList<>();
        if (piece.getPieceType() == PieceType.BISHOP) {
-           bishopMoves(board, myPosition, moves);
+           brqMoves(board, myPosition, moves);
            return moves;
        }
        if (piece.getPieceType() == PieceType.ROOK) {
-            rookMoves(board, myPosition, moves);
+           brqMoves(board, myPosition, moves);
             return moves;
         }
         if (piece.getPieceType() == PieceType.QUEEN) {
-            queenMoves(board, myPosition, moves);
+            brqMoves(board, myPosition, moves);
             return moves;
         }
         if (piece.getPieceType() == PieceType.KNIGHT) {
-            knightMoves(board, myPosition, moves);
+            knMoves(board, myPosition, moves);
             return moves;
         }
         if (piece.getPieceType() == PieceType.KING) {
-            kingMoves(board, myPosition, moves);
+            knMoves(board, myPosition, moves);
             return moves;
         }
         if (piece.getPieceType() == PieceType.PAWN) {
