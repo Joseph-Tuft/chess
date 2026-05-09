@@ -12,11 +12,34 @@ import java.util.Objects;
 public class ChessBoard {
 
     ChessPiece[][] board = new ChessPiece[8][8];
+    public ChessPosition whiteKing = new ChessPosition(1,5);
+    public ChessPosition blackKing = new ChessPosition(8,5);
 
     public ChessBoard() {
         
     }
 
+    public ChessBoard(ChessBoard board) {
+        for (int i = 0; i<8; i++){
+            System.arraycopy(board.board[i], 0, this.board[i], 0, 8);
+        }
+        this.blackKing = board.blackKing;
+        this.whiteKing = board.whiteKing;
+    }
+
+    public void setKingPos (ChessGame.TeamColor turn, ChessPosition endPosition){
+        if (turn == ChessGame.TeamColor.BLACK){
+            blackKing = endPosition;
+        } else {
+            whiteKing = endPosition;
+        }
+    }
+
+    public ChessPosition getKingPos (ChessGame.TeamColor turn){
+        if(turn == ChessGame.TeamColor.BLACK){
+            return blackKing;
+        } else { return whiteKing;}
+    }
     /**
      * Adds a chess piece to the chessboard
      *
