@@ -117,14 +117,12 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor, ChessBoard board) {
         board.findKings();
         ChessPosition kingPos = board.getKingPos(teamColor);
-        System.out.printf("KingPos: %s%n", kingPos);
         for(int row = 1; row <=8; row++){
             for(int col = 1; col <=8; col++){
                 ChessPosition opponentPos = new ChessPosition(row, col);
                 ChessPiece opponent = board.getPiece(opponentPos);
                 if (opponent != null && opponent.getTeamColor() != teamColor){
                     Collection<ChessMove> moves = opponent.pieceMoves(board, opponentPos);
-                    System.out.printf("%s %s moves: %s%n", opponent.getTeamColor(), opponent.getPieceType(), moves);
                     for(ChessMove move : moves){
                         if (move.getEndPosition().equals(kingPos)){
                             return true;
@@ -181,7 +179,7 @@ public class ChessGame {
                 ChessPosition currPos = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(currPos);
                 if (piece != null && piece.getTeamColor() == teamColor) {
-                    if (validMoves(currPos) != null) {
+                    if (!validMoves(currPos).isEmpty()) {
                         return false;
                     }
                 }
