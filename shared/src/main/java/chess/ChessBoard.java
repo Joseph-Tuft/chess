@@ -12,19 +12,32 @@ import java.util.Objects;
 public class ChessBoard {
 
     ChessPiece[][] board = new ChessPiece[8][8];
-    public ChessPosition whiteKing = new ChessPosition(1,5);
-    public ChessPosition blackKing = new ChessPosition(8,5);
+    public ChessPosition whiteKing;
+    public ChessPosition blackKing;
 
     public ChessBoard() {
-        
+        findKings();
     }
 
     public ChessBoard(ChessBoard board) {
         for (int i = 0; i<8; i++){
             System.arraycopy(board.board[i], 0, this.board[i], 0, 8);
         }
-        this.blackKing = board.blackKing;
-        this.whiteKing = board.whiteKing;
+        findKings();
+    }
+
+    public void findKings(){
+        for (int i = 1; i<=8; i++){
+            for(int j = 1; j<=8; j++){
+                ChessPosition currPos = new ChessPosition(i,j);
+                ChessPiece piece = getPiece(currPos);
+                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING){
+                    if (piece.getTeamColor() == ChessGame.TeamColor.BLACK){
+                        blackKing = currPos;
+                    } else {whiteKing = currPos;}
+                }
+            }
+        }
     }
 
     public void setKingPos (ChessGame.TeamColor turn, ChessPosition endPosition){
@@ -129,5 +142,51 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(board);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("");
+        for (int i = 8; i>=1; i--){
+            for(int j = 1; j<=8; j++){
+                sb.append("|");
+                ChessPiece piece = getPiece(new ChessPosition(i,j));
+                if(piece == null){
+                    sb.append(" ");
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.PAWN){
+                    if(piece.getTeamColor() == ChessGame.TeamColor.BLACK){
+                        sb.append("p");
+                    } else {sb.append("P");}
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.KING){
+                    if(piece.getTeamColor() == ChessGame.TeamColor.BLACK){
+                        sb.append("k");
+                    } else {sb.append("K");}
+                    }
+                else if(piece.getPieceType() == ChessPiece.PieceType.QUEEN){
+                    if(piece.getTeamColor() == ChessGame.TeamColor.BLACK){
+                        sb.append("q");
+                    } else {sb.append("Q");}
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.BISHOP){
+                    if(piece.getTeamColor() == ChessGame.TeamColor.BLACK){
+                        sb.append("b");
+                    } else {sb.append("B");}
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.KNIGHT){
+                    if(piece.getTeamColor() == ChessGame.TeamColor.BLACK){
+                        sb.append("n");
+                    } else {sb.append("N");}
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.ROOK){
+                    if(piece.getTeamColor() == ChessGame.TeamColor.BLACK){
+                        sb.append("r");
+                    } else {sb.append("R");}
+                }
+            }
+            sb.append("|%n");
+        }
+        return String.format(sb.toString());
     }
 }
