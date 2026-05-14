@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Objects;
 
 /**
@@ -45,6 +46,7 @@ public class ChessGame {
         WHITE,
         BLACK
     }
+
 
     /**
      * Gets all valid moves for a piece at the given location
