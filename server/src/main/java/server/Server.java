@@ -1,5 +1,6 @@
 package server;
 
+import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -30,13 +31,14 @@ public class Server {
     }
 
     private void register(Context ctx){
-        UserData user = ctx.bodyAsClass(UserData.class);
+        UserData user = new Gson().fromJson(ctx.body(), UserData.class);
+
         try{
             AuthData result = service.register(user);
-            ctx.json(result);
+            ctx.result(new Gson().toJson(result));
             ctx.status(200);
         } catch (DataAccessException e){
-            ctx.json(new ErrorResponse(e.getMessage()));
+            ctx.result(new Gson().toJson(new ErrorResponse(e.getMessage())));
             ctx.status(403);
         }
     }
