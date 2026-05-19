@@ -7,6 +7,7 @@ import dataaccess.GameDAO;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import model.*;
 
 public class Service {
     private UserDAO userDAO = new UserDAO();
@@ -17,9 +18,23 @@ public class Service {
         return UUID.randomUUID().toString();
     }
 
-    public AuthData register(UserData user) throws DataAccessException {
+    public RegisterResponse register(RegisterRequest request) throws DataAccessException {
+        //Create userData object and add it to database
+        UserData user = new UserData(request.username(), request.password(), request.email());
         userDAO.createUser(user);
+
+        //Create authData object and add it to database
         String authToken = generateToken();
-        return new AuthData(authToken, user.username());
+        AuthData auth = new AuthData(authToken, user.username());
+        authDAO.createAuth(auth);
+
+        //return response
+        return new RegisterResponse(auth.authToken(), auth.username());
+    }
+
+    public void clear() throws DataAccessException {
+        userDAO.clearUsers();
+        authDAO.clearAuths();
+        gameDAO.clearGames();
     }
 }

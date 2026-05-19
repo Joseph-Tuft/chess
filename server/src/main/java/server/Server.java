@@ -5,8 +5,11 @@ import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
+import model.RegisterRequest;
+import model.RegisterResponse;
 import model.UserData;
 import service.Service;
+import model.*;
 
 public class Server {
     private Service service = new Service();
@@ -18,6 +21,7 @@ public class Server {
 
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register);
+        javalin.delete("/db", this::clear);
 
     }
 
@@ -31,15 +35,26 @@ public class Server {
     }
 
     private void register(Context ctx){
-        UserData user = new Gson().fromJson(ctx.body(), UserData.class);
+        RegisterRequest request = new Gson().fromJson(ctx.body(), RegisterRequest.class);
 
         try{
-            AuthData result = service.register(user);
-            ctx.result(new Gson().toJson(result));
+            RegisterResponse response = service.register(request);
+            ctx.result(new Gson().toJson(response));
             ctx.status(200);
         } catch (DataAccessException e){
             ctx.result(new Gson().toJson(new ErrorResponse(e.getMessage())));
             ctx.status(403);
+        }
+    }
+
+    private void clear(Context ctx){
+        try{
+            service.clear();
+            ctx.result("{}");
+            ctx.status(200);
+        } catch (DataAccessException e){
+            ctx.result(new Gson().toJson(new ErrorResponse(e.getMessage())));
+            ctx.status(500);
         }
     }
 }

@@ -2,8 +2,13 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.GameData;
+import model.UserData;
+
+import java.util.ArrayList;
 
 public class GameDAO {
+
+    private static ArrayList<GameData> gameList = new ArrayList<>();
 
     public void createGame(GameData g) throws DataAccessException{
 
@@ -27,5 +32,9 @@ public class GameDAO {
 
     public void deleteGame(int gameID) throws DataAccessException{
 
+    }
+
+    public void clearGames() throws DataAccessException{
+        gameList.clear();
     }
 }

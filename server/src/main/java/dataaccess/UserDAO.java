@@ -23,4 +23,8 @@ public class UserDAO {
 
     }
 
+    public void clearUsers() throws DataAccessException{
+        userList.clear();
+    }
+
 }
