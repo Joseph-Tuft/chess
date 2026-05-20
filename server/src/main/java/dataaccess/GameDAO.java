@@ -9,9 +9,11 @@ import java.util.ArrayList;
 public class GameDAO {
 
     private static ArrayList<GameData> gameList = new ArrayList<>();
+    public static int numGames = 1;
 
     public void createGame(GameData g) throws DataAccessException{
-
+        gameList.add(g);
+        numGames++;
     }
 
     public GameData getGame(int gameID) throws DataAccessException{

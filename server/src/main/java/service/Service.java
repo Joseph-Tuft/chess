@@ -1,6 +1,8 @@
 package service;
 import java.util.UUID;
 import java.lang.reflect.Field;
+
+import chess.ChessGame;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
@@ -68,6 +70,18 @@ public class Service {
         AuthData auth = authDAO.getAuthFromAuth(request.authToken());
         authDAO.deleteAuth(auth);
         return new LogoutResponse();
+    }
+
+    public CreateGameResponse createGame(CreateGameRequest request) throws DataAccessException{
+        //Validate request
+        checkNullFields(request);
+
+        //Validate authoken and get authData
+        AuthData auth = authDAO.getAuthFromAuth(request.authToken());
+
+        int ID = GameDAO.numGames;
+        GameData game = new GameData(GameDAO.numGames, null, null, request.gameName(), new ChessGame());
+        return new CreateGameResponse(game.gameID());
     }
 
     public void clear() throws DataAccessException {

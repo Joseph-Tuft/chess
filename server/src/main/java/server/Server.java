@@ -22,7 +22,8 @@ public class Server {
         javalin.delete("/db", this::clear);
         javalin.post("/session", this::login);
         javalin.delete("/session", this::logout);
-        javalin.
+        javalin.post("/game", this::createGame);
+        javalin.get("/game", this::listGames);
 
     }
 
@@ -59,6 +60,16 @@ public class Server {
     private void logout(Context ctx){
         LogoutRequest request = new LogoutRequest(ctx.header("authorization"));
         handlerHelper(ctx, request, () -> service.logout(request));
+    }
+
+    private void createGame(Context ctx){
+        CreateGameRequest tempRequest = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
+        CreateGameRequest request = new CreateGameRequest(tempRequest.gameName(), ctx.header("authorization"));
+        handlerHelper(ctx, request, () -> service.createGame(request));
+    }
+
+    private void listGames(Context ctx){
+        ListGamesRequest request = new ListGamesRequest(ctx.header("authorization"));
     }
 
     private void handlerHelper(Context ctx, Object request, Supplier<Object> serviceMethod){
