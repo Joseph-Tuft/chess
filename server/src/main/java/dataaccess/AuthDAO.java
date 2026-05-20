@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class AuthDAO {
 
-    private static ArrayList<AuthData> authList = new ArrayList<>();
+    private static final ArrayList<AuthData> authList = new ArrayList<>();
 
     public void createAuth(AuthData a) throws DataAccessException {
         authList.add(a);
@@ -21,15 +21,6 @@ public class AuthDAO {
             }
         }
         throw new UnauthorizedRequestException("Error: unauthorized (auth Token)");
-    }
-
-    public AuthData getAuthFromUser(String username) throws DataAccessException{
-        for (AuthData auth : authList){
-            if (auth.username().equals(username)){
-                return auth;
-            }
-        }
-        throw new UnauthorizedRequestException("Error: unauthorized (auth username)");
     }
 
     public void deleteAuth(AuthData auth) throws DataAccessException{

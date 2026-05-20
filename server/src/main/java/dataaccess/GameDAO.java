@@ -26,10 +26,6 @@ public class GameDAO {
         throw new BadRequestException("Error: bad request");
     }
 
-    public GameData getGame(String gameName) throws DataAccessException{
-        return null;
-    }
-
     public void updateGame(String username, String playerColor, int gameID) throws DataAccessException{
         GameData tempGame = getGame(gameID);
 
@@ -45,14 +41,6 @@ public class GameDAO {
 
         gameList.remove(tempGame);
         gameList.add(game);
-    }
-
-    public void deleteGame(String gameName) throws DataAccessException{
-
-    }
-
-    public void deleteGame(int gameID) throws DataAccessException{
-
     }
 
     public void clearGames() throws DataAccessException{

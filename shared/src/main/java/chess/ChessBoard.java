@@ -146,7 +146,7 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("");
+        StringBuilder sb = new StringBuilder();
         for (int i = 8; i>=1; i--){
             for(int j = 1; j<=8; j++){
                 sb.append("|");

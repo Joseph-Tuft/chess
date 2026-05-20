@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class UserDAO {
 
-    private static ArrayList<UserData> userList = new ArrayList<>();
+    private static final ArrayList<UserData> userList = new ArrayList<>();
 
     public void createUser(UserData u) throws DataAccessException {
         if (userList.contains(u)){
@@ -25,10 +25,6 @@ public class UserDAO {
             }
         }
         throw new UnauthorizedRequestException("Error: unauthorized (user)");
-    }
-
-    public void deleteUser(String username) throws DataAccessException{
-
     }
 
     public void clearUsers() throws DataAccessException{
