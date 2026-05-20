@@ -10,7 +10,7 @@ public class UserDAO {
 
     public void createUser(UserData u) throws DataAccessException{
         if (userList.contains(u)){
-            throw new DuplicateUsernameException("Error: already taken");
+            throw new AlreadyTakenException("Error: already taken");
         }
         else userList.add(u);
     }

@@ -10,7 +10,7 @@ import model.*;
 import java.util.function.Supplier;
 
 public class Server {
-    private Service service = new Service();
+    private final Service service = new Service();
 
     private final Javalin javalin;
 
@@ -24,6 +24,7 @@ public class Server {
         javalin.delete("/session", this::logout);
         javalin.post("/game", this::createGame);
         javalin.get("/game", this::listGames);
+        javalin.put("/game", this::joinGame);
 
     }
 
@@ -38,52 +39,52 @@ public class Server {
 
     private void register(Context ctx){
         RegisterRequest request = new Gson().fromJson(ctx.body(), RegisterRequest.class);
-        handlerHelper(ctx, request, () -> service.register(request));
+        handlerHelper(ctx, () -> service.register(request));
     }
 
     private void clear(Context ctx){
-        try{
-            service.clear();
-            ctx.result("{}");
-            ctx.status(200);
-        } catch (DataAccessException e){
-            ctx.result(new Gson().toJson(new ErrorResponse(e.getMessage())));
-            ctx.status(500);
-        }
+        handlerHelper(ctx, service::clear);
     }
 
     private void login(Context ctx){
         LoginRequest request = new Gson().fromJson(ctx.body(), LoginRequest.class);
-        handlerHelper(ctx, request, () -> service.login(request));
+        handlerHelper(ctx, () -> service.login(request));
     }
 
     private void logout(Context ctx){
         LogoutRequest request = new LogoutRequest(ctx.header("authorization"));
-        handlerHelper(ctx, request, () -> service.logout(request));
+        handlerHelper(ctx, () -> service.logout(request));
     }
 
     private void createGame(Context ctx){
         CreateGameRequest tempRequest = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
         CreateGameRequest request = new CreateGameRequest(tempRequest.gameName(), ctx.header("authorization"));
-        handlerHelper(ctx, request, () -> service.createGame(request));
+        handlerHelper(ctx, () -> service.createGame(request));
     }
 
     private void listGames(Context ctx){
         ListGamesRequest request = new ListGamesRequest(ctx.header("authorization"));
+        handlerHelper(ctx, () -> service.listGames(request));
     }
 
-    private void handlerHelper(Context ctx, Object request, Supplier<Object> serviceMethod){
+    private void joinGame(Context ctx){
+        JoinGameRequest tempRequest = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
+        JoinGameRequest request = new JoinGameRequest(tempRequest.playerColor(), tempRequest.gameID(), ctx.header("authorization"));
+        handlerHelper(ctx, () -> service.joinGame(request));
+    }
+
+    private void handlerHelper(Context ctx, Supplier<Object> serviceMethod){
         try{
             Object response = serviceMethod.get();
             ctx.result(new Gson().toJson(response));
             ctx.status(200);
-        } catch (IncompleteRequestException e) {
+        } catch (BadRequestException e) {
             ctx.result(new Gson().toJson(new ErrorResponse(e.getMessage())));
             ctx.status(400);
         } catch (UnauthorizedRequestException e) {
             ctx.result(new Gson().toJson(new ErrorResponse(e.getMessage())));
             ctx.status(401);
-        } catch (DuplicateUsernameException e){
+        } catch (AlreadyTakenException e){
             ctx.result(new Gson().toJson(new ErrorResponse(e.getMessage())));
             ctx.status(403);
         } catch (CustomErrorException e){

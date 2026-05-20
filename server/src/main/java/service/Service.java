@@ -1,4 +1,5 @@
 package service;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.lang.reflect.Field;
 
@@ -17,15 +18,15 @@ public class Service {
         return UUID.randomUUID().toString();
     }
 
-    public void checkNullFields(Object object) throws IncompleteRequestException{
+    public void checkNullFields(Object object) throws BadRequestException {
         for (Field field : object.getClass().getDeclaredFields()){
             field.setAccessible(true);
             try {
                 if (field.get(object) == null) {
-                    throw new IncompleteRequestException("Error: bad request");
+                    throw new BadRequestException("Error: bad request");
                 }
             } catch (IllegalAccessException e) {
-                throw new IncompleteRequestException("Error: bad request");
+                throw new BadRequestException("Error: bad request");
             }
         }
     }
@@ -66,10 +67,10 @@ public class Service {
         return new LoginResponse(auth.username(), auth.authToken());
     }
 
-    public LogoutResponse logout(LogoutRequest request) throws DataAccessException{
+    public EmptyRecord logout(LogoutRequest request) throws DataAccessException{
         AuthData auth = authDAO.getAuthFromAuth(request.authToken());
         authDAO.deleteAuth(auth);
-        return new LogoutResponse();
+        return new EmptyRecord();
     }
 
     public CreateGameResponse createGame(CreateGameRequest request) throws DataAccessException{
@@ -81,13 +82,43 @@ public class Service {
 
         int ID = GameDAO.numGames;
         GameData game = new GameData(GameDAO.numGames, null, null, request.gameName(), new ChessGame());
+        gameDAO.createGame(game);
         return new CreateGameResponse(game.gameID());
     }
 
-    public void clear() throws DataAccessException {
+    public ListGamesResponse listGames(ListGamesRequest request) throws DataAccessException{
+        //Validate request
+        checkNullFields(request);
+
+        //Validate authToken
+        authDAO.getAuthFromAuth(request.authToken());
+
+        //Make a list only containing information that will be sent in response
+        ArrayList<GameDataResponse> responses = new ArrayList<>();
+        for (GameData game : GameDAO.gameList){
+            responses.add(new GameDataResponse(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName()));
+        }
+
+        return new ListGamesResponse(responses);
+    }
+
+    public EmptyRecord joinGame(JoinGameRequest request) throws DataAccessException{
+        //Validate request
+        checkNullFields(request);
+
+        //Validate authToken and get authData
+        AuthData auth = authDAO.getAuthFromAuth(request.authToken());
+
+        //Join game, check if color is already taken
+        gameDAO.updateGame(auth.username(), request.playerColor(), request.gameID());
+        return new EmptyRecord();
+    }
+
+    public EmptyRecord clear() throws DataAccessException {
         userDAO.clearUsers();
         authDAO.clearAuths();
         gameDAO.clearGames();
+        return new EmptyRecord();
     }
 
 
