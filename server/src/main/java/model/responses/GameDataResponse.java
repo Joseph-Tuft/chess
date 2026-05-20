@@ -1,4 +1,4 @@
-package model.Responses;
+package model.responses;
 
 public record GameDataResponse(int gameID,
                                String whiteUsername,

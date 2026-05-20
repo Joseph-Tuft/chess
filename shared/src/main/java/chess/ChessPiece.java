@@ -33,7 +33,7 @@ public class ChessPiece {
         PAWN
     }
 
-    public static Map<PieceType, int[][]> DIRECTIONS = Map.of(
+    public final static Map<PieceType, int[][]> DIRECTIONS = Map.of(
             PieceType.KING, new int[][]{
                     {1,0},{1,-1},{1,1},{0,1},
                     {0,-1},{-1,0},{-1,-1},{-1,1}},

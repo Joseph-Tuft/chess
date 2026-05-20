@@ -1,25 +1,25 @@
 package dataaccess;
 
-import dataaccess.Exceptions.AlreadyTakenException;
-import dataaccess.Exceptions.DataAccessException;
-import dataaccess.Exceptions.UnauthorizedRequestException;
+import dataaccess.exceptions.AlreadyTakenException;
+import dataaccess.exceptions.DataAccessException;
+import dataaccess.exceptions.UnauthorizedRequestException;
 import model.UserData;
 
 import java.util.ArrayList;
 
 public class UserDAO {
 
-    private static final ArrayList<UserData> userList = new ArrayList<>();
+    private static final ArrayList<UserData> USER_LIST = new ArrayList<>();
 
     public void createUser(UserData u) throws DataAccessException {
-        if (userList.contains(u)){
+        if (USER_LIST.contains(u)){
             throw new AlreadyTakenException("Error: already taken");
         }
-        else userList.add(u);
+        else USER_LIST.add(u);
     }
 
     public UserData getUser(String username) throws DataAccessException{
-        for (UserData user : userList){
+        for (UserData user : USER_LIST){
             if (user.username().equals(username)){
                 return user;
             }
@@ -28,7 +28,7 @@ public class UserDAO {
     }
 
     public void clearUsers() throws DataAccessException{
-        userList.clear();
+        USER_LIST.clear();
     }
 
 }

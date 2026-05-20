@@ -1,21 +1,21 @@
 package dataaccess;
 
-import dataaccess.Exceptions.DataAccessException;
-import dataaccess.Exceptions.UnauthorizedRequestException;
+import dataaccess.exceptions.DataAccessException;
+import dataaccess.exceptions.UnauthorizedRequestException;
 import model.AuthData;
 
 import java.util.ArrayList;
 
 public class AuthDAO {
 
-    private static final ArrayList<AuthData> authList = new ArrayList<>();
+    private static final ArrayList<AuthData> AUTH_LIST = new ArrayList<>();
 
     public void createAuth(AuthData a) throws DataAccessException {
-        authList.add(a);
+        AUTH_LIST.add(a);
     }
 
     public AuthData getAuthFromAuth(String authToken) throws DataAccessException{
-        for (AuthData auth : authList){
+        for (AuthData auth : AUTH_LIST){
             if (auth.authToken().equals(authToken)){
                 return auth;
             }
@@ -24,12 +24,12 @@ public class AuthDAO {
     }
 
     public void deleteAuth(AuthData auth) throws DataAccessException{
-        if (!authList.remove(auth)){
+        if (!AUTH_LIST.remove(auth)){
             throw new UnauthorizedRequestException("Error: unauthorized (auth delete)");
         }
     }
 
     public void clearAuths() throws DataAccessException{
-        authList.clear();
+        AUTH_LIST.clear();
     }
 }

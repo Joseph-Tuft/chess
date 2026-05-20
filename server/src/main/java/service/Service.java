@@ -4,9 +4,9 @@ import java.util.UUID;
 import java.lang.reflect.Field;
 import chess.ChessGame;
 import dataaccess.*;
-import dataaccess.Exceptions.*;
-import model.Requests.*;
-import model.Responses.*;
+import dataaccess.exceptions.*;
+import model.requests.*;
+import model.responses.*;
 import model.*;
 
 public class Service {
@@ -94,7 +94,7 @@ public class Service {
 
         //Make a list only containing information that will be sent in response
         ArrayList<GameDataResponse> responses = new ArrayList<>();
-        for (GameData game : GameDAO.gameList){
+        for (GameData game : GameDAO.GAME_LIST){
             responses.add(new GameDataResponse(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName()));
         }
 
