@@ -1,5 +1,8 @@
 package dataaccess;
 
+import dataaccess.Exceptions.AlreadyTakenException;
+import dataaccess.Exceptions.BadRequestException;
+import dataaccess.Exceptions.DataAccessException;
 import model.GameData;
 
 import java.util.ArrayList;
@@ -9,7 +12,7 @@ public class GameDAO {
     public static ArrayList<GameData> gameList = new ArrayList<>();
     public static int numGames = 1;
 
-    public void createGame(GameData g) throws DataAccessException{
+    public void createGame(GameData g) throws DataAccessException {
         gameList.add(g);
         numGames++;
     }

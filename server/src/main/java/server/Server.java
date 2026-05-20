@@ -1,11 +1,15 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.*;
+import dataaccess.Exceptions.AlreadyTakenException;
+import dataaccess.Exceptions.BadRequestException;
+import dataaccess.Exceptions.CustomErrorException;
+import dataaccess.Exceptions.UnauthorizedRequestException;
 import io.javalin.*;
 import io.javalin.http.Context;
+import model.ErrorResponse;
+import model.Requests.*;
 import service.Service;
-import model.*;
 
 import java.util.function.Supplier;
 

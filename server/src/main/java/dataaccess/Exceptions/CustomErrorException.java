@@ -1,4 +1,4 @@
-package dataaccess;
+package dataaccess.Exceptions;
 
 public class CustomErrorException extends DataAccessException {
     public CustomErrorException(String message) {

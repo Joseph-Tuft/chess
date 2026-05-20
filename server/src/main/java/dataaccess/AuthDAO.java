@@ -1,7 +1,8 @@
 package dataaccess;
 
+import dataaccess.Exceptions.DataAccessException;
+import dataaccess.Exceptions.UnauthorizedRequestException;
 import model.AuthData;
-import model.UserData;
 
 import java.util.ArrayList;
 
@@ -9,7 +10,7 @@ public class AuthDAO {
 
     private static ArrayList<AuthData> authList = new ArrayList<>();
 
-    public void createAuth(AuthData a) throws DataAccessException{
+    public void createAuth(AuthData a) throws DataAccessException {
         authList.add(a);
     }
 

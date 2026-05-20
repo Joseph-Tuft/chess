@@ -2,23 +2,23 @@ package service;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.lang.reflect.Field;
-
 import chess.ChessGame;
 import dataaccess.*;
-import model.AuthData;
-import model.UserData;
+import dataaccess.Exceptions.*;
+import model.Requests.*;
+import model.Responses.*;
 import model.*;
 
 public class Service {
-    private UserDAO userDAO = new UserDAO();
-    private AuthDAO authDAO = new AuthDAO();
-    private GameDAO gameDAO = new GameDAO();
+    private final UserDAO userDAO = new UserDAO();
+    private final AuthDAO authDAO = new AuthDAO();
+    private final GameDAO gameDAO = new GameDAO();
 
-    public static String generateToken() {
+    private static String generateToken() {
         return UUID.randomUUID().toString();
     }
 
-    public void checkNullFields(Object object) throws BadRequestException {
+    private void checkNullFields(Object object) throws BadRequestException {
         for (Field field : object.getClass().getDeclaredFields()){
             field.setAccessible(true);
             try {
@@ -78,9 +78,8 @@ public class Service {
         checkNullFields(request);
 
         //Validate authoken and get authData
-        AuthData auth = authDAO.getAuthFromAuth(request.authToken());
+        authDAO.getAuthFromAuth(request.authToken());
 
-        int ID = GameDAO.numGames;
         GameData game = new GameData(GameDAO.numGames, null, null, request.gameName(), new ChessGame());
         gameDAO.createGame(game);
         return new CreateGameResponse(game.gameID());
@@ -120,6 +119,5 @@ public class Service {
         gameDAO.clearGames();
         return new EmptyRecord();
     }
-
 
 }
