@@ -10,13 +10,18 @@ public class UserDAO {
 
     public void createUser(UserData u) throws DataAccessException{
         if (userList.contains(u)){
-            throw new DataAccessException("Error: already taken");
+            throw new DuplicateUsernameException("Error: already taken");
         }
         else userList.add(u);
     }
 
     public UserData getUser(String username) throws DataAccessException{
-        return null;
+        for (UserData user : userList){
+            if (user.username().equals(username)){
+                return user;
+            }
+        }
+        throw new UnauthorizedRequestException("Error: unauthorized (user)");
     }
 
     public void deleteUser(String username) throws DataAccessException{
