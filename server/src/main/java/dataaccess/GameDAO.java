@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class GameDAO {
 
-    public static ArrayList<GameData> GAME_LIST = new ArrayList<>();
+    public static final ArrayList<GameData> GAME_LIST = new ArrayList<>();
     public static int numGames = 1;
 
     public void createGame(GameData g) throws DataAccessException {
