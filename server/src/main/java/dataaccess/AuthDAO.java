@@ -23,6 +23,15 @@ public class AuthDAO {
         throw new UnauthorizedRequestException("Error: unauthorized (auth Token)");
     }
 
+    public AuthData getAuthFromUser(String username) throws DataAccessException{
+        for (AuthData auth : AUTH_LIST){
+            if (auth.username().equals(username)){
+                return auth;
+            }
+        }
+        throw new UnauthorizedRequestException("Error: unauthorized (username)");
+    }
+
     public void deleteAuth(AuthData auth) throws DataAccessException{
         if (!AUTH_LIST.remove(auth)){
             throw new UnauthorizedRequestException("Error: unauthorized (auth delete)");

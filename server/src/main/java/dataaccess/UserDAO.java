@@ -15,7 +15,7 @@ public class UserDAO {
         if (USER_LIST.contains(u)){
             throw new AlreadyTakenException("Error: already taken");
         }
-        else USER_LIST.add(u);
+        else {USER_LIST.add(u);}
     }
 
     public UserData getUser(String username) throws DataAccessException{

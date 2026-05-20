@@ -80,7 +80,7 @@ public class ChessPiece {
             ChessPiece opponent = board.getPiece(nextPos);
             if (opponent == null) {
                 return true;
-            } else return opponent.getTeamColor() != color;
+            } else {return opponent.getTeamColor() != color;}
         }
         return false;
     }
