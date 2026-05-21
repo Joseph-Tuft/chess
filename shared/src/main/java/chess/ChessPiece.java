@@ -156,22 +156,29 @@ public class ChessPiece {
             ChessPosition nextPos = new ChessPosition(startPos.getRow()+d[0], startPos.getColumn()+d[1]);
             if(isSquareValid(board, startPos, nextPos)){
                 //Move forward
-                if(d[1] == 0){
-                    if(Math.abs(d[0])==2 && isFirstMove(board, startPos) && board.getPiece(nextPos)==null){
-                        ChessPosition intermediate = new ChessPosition(startPos.getRow()+d[0]/2, startPos.getColumn()+d[1]);
-                        if (board.getPiece(intermediate)==null){
-                            moves.add(new ChessMove(startPos, nextPos, null));
-                        }
-                    }
-                    if (Math.abs(d[0])==1 && board.getPiece(nextPos)==null){
-                        checkPromoteAndAdd(board, startPos, nextPos, moves);
-                    }
-                }
-                else if (board.getPiece(nextPos) != null){
+                if(!tryMoveForward(d, board, startPos, moves) && board.getPiece(nextPos) != null){
                     checkPromoteAndAdd(board, startPos, nextPos, moves);
                 }
             }
         }
+    }
+
+    private boolean tryMoveForward (int[] d, ChessBoard board, ChessPosition startPos, ArrayList<ChessMove> moves){
+        ChessPosition nextPos = new ChessPosition(startPos.getRow()+d[0], startPos.getColumn()+d[1]);
+        if(d[1] == 0){
+            if(Math.abs(d[0])==2 && isFirstMove(board, startPos) && board.getPiece(nextPos)==null){
+                ChessPosition intermediate = new ChessPosition(startPos.getRow()+d[0]/2, startPos.getColumn()+d[1]);
+                if (board.getPiece(intermediate)==null){
+                    moves.add(new ChessMove(startPos, nextPos, null));
+                    return true;
+                }
+            }
+            if (Math.abs(d[0])==1 && board.getPiece(nextPos)==null){
+                checkPromoteAndAdd(board, startPos, nextPos, moves);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

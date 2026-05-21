@@ -106,7 +106,6 @@ public class ServiceTests {
         service.clear();
         RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
         service.register(registerRequest);
-        AuthData auth = authDAO.getAuthFromUser(registerRequest.username());
 
         ListGamesRequest listGamesRequest = new ListGamesRequest("");
         Assertions.assertThrows(UnauthorizedRequestException.class, () -> service.listGames(listGamesRequest));
@@ -207,7 +206,7 @@ public class ServiceTests {
 
         AuthData joeAuth = authDAO.getAuthFromUser(registerRequest.username());
         CreateGameRequest createGameRequest = new CreateGameRequest("Joes Game", joeAuth.authToken());
-        int gameID = service.createGame(createGameRequest).gameID();
+        service.createGame(createGameRequest);
         Assertions.assertFalse(GameDAO.GAME_LIST.isEmpty());
 
         service.clear();

@@ -121,14 +121,8 @@ public class ChessGame {
         for(int row = 1; row <=8; row++){
             for(int col = 1; col <=8; col++){
                 ChessPosition opponentPos = new ChessPosition(row, col);
-                ChessPiece opponent = board.getPiece(opponentPos);
-                if (opponent != null && opponent.getTeamColor() != teamColor){
-                    Collection<ChessMove> moves = opponent.pieceMoves(board, opponentPos);
-                    for(ChessMove move : moves){
-                        if (move.getEndPosition().equals(kingPos)){
-                            return true;
-                        }
-                    }
+                if (isThreateningKing(opponentPos, teamColor, kingPos, board)){
+                    return true;
                 }
             }
         }
@@ -137,6 +131,19 @@ public class ChessGame {
 
     public boolean isInCheck(TeamColor teamColor) {
         return isInCheck(teamColor, this.board);
+    }
+
+    private boolean isThreateningKing(ChessPosition opponentPos, TeamColor teamColor, ChessPosition kingPos, ChessBoard board){
+        ChessPiece opponent = board.getPiece(opponentPos);
+        if (opponent != null && opponent.getTeamColor() != teamColor){
+            Collection<ChessMove> moves = opponent.pieceMoves(board, opponentPos);
+            for(ChessMove move : moves){
+                if (move.getEndPosition().equals(kingPos)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
