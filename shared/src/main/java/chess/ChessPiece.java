@@ -156,7 +156,7 @@ public class ChessPiece {
             ChessPosition nextPos = new ChessPosition(startPos.getRow()+d[0], startPos.getColumn()+d[1]);
             if(isSquareValid(board, startPos, nextPos)){
                 //Move forward
-                if(!tryMoveForward(d, board, startPos, moves) && board.getPiece(nextPos) != null){
+                if(!tryMoveForward(d, board, startPos, moves) && d[1] != 0 && board.getPiece(nextPos) != null){
                     checkPromoteAndAdd(board, startPos, nextPos, moves);
                 }
             }
