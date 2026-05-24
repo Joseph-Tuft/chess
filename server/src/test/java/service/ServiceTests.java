@@ -12,9 +12,9 @@ import org.junit.jupiter.api.*;
 
 public class ServiceTests {
     Service service = new Service();
-    public final UserDAO userDAO = new UserDAO();
-    public final AuthDAO authDAO = new AuthDAO();
-    public final GameDAO gameDAO = new GameDAO();
+    public final MemoryUserDAO userDAO = new MemoryUserDAO();
+    public final MemoryAuthDAO authDAO = new MemoryAuthDAO();
+    public final MemoryGameDAO gameDAO = new MemoryGameDAO();
 
 
     @Test
@@ -207,10 +207,10 @@ public class ServiceTests {
         AuthData joeAuth = authDAO.getAuthFromUser(registerRequest.username());
         CreateGameRequest createGameRequest = new CreateGameRequest("Joes Game", joeAuth.authToken());
         service.createGame(createGameRequest);
-        Assertions.assertFalse(GameDAO.GAME_LIST.isEmpty());
+        Assertions.assertFalse(MemoryGameDAO.GAME_LIST.isEmpty());
 
         service.clear();
 
-        Assertions.assertTrue(GameDAO.GAME_LIST.isEmpty());
+        Assertions.assertTrue(MemoryGameDAO.GAME_LIST.isEmpty());
     }
 }

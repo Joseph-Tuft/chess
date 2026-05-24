@@ -10,9 +10,9 @@ import model.responses.*;
 import model.*;
 
 public class Service {
-    private final UserDAO userDAO = new UserDAO();
-    private final AuthDAO authDAO = new AuthDAO();
-    private final GameDAO gameDAO = new GameDAO();
+    private final UserDAO userDAO = new MemoryUserDAO();
+    private final AuthDAO authDAO = new MemoryAuthDAO();
+    private final GameDAO gameDAO = new MemoryGameDAO();
 
     private static String generateToken() {
         return UUID.randomUUID().toString();
@@ -80,7 +80,7 @@ public class Service {
         //Validate authoken and get authData
         authDAO.getAuthFromAuth(request.authToken());
 
-        GameData game = new GameData(GameDAO.numGames, null, null, request.gameName(), new ChessGame());
+        GameData game = new GameData(MemoryGameDAO.numGames, null, null, request.gameName(), new ChessGame());
         gameDAO.createGame(game);
         return new CreateGameResponse(game.gameID());
     }
@@ -94,7 +94,7 @@ public class Service {
 
         //Make a list only containing information that will be sent in response
         ArrayList<GameDataResponse> responses = new ArrayList<>();
-        for (GameData game : GameDAO.GAME_LIST){
+        for (GameData game : MemoryGameDAO.GAME_LIST){
             responses.add(new GameDataResponse(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName()));
         }
 
