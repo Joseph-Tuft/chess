@@ -10,9 +10,9 @@ import model.responses.*;
 import model.*;
 
 public class Service {
-    private final UserDAO userDAO = new MemoryUserDAO();
-    private final AuthDAO authDAO = new MemoryAuthDAO();
-    private final GameDAO gameDAO = new MemoryGameDAO();
+    private final UserDAO userDAO = DataAccessSelector.getUserDAO();
+    private final AuthDAO authDAO = DataAccessSelector.getAuthDAO();
+    private final GameDAO gameDAO = DataAccessSelector.getGameDAO();
 
     private static String generateToken() {
         return UUID.randomUUID().toString();
