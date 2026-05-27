@@ -35,8 +35,8 @@ public class DataAccessSelector {
             """
             CREATE TABLE IF NOT EXISTS  gameList (
               `id` int NOT NULL AUTO_INCREMENT,
-              `whiteUsername` varchar(256) NOT NULL,
-              `blackUsername` varchar(256) NOT NULL,
+              `whiteUsername` varchar(256),
+              `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
               `game` JSON,
               PRIMARY KEY (`id`),
