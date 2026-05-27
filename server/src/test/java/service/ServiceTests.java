@@ -12,9 +12,9 @@ import org.junit.jupiter.api.*;
 
 public class ServiceTests {
     Service service = new Service();
-    public final MemoryUserDAO userDAO = new MemoryUserDAO();
-    public final MemoryAuthDAO authDAO = new MemoryAuthDAO();
-    public final MemoryGameDAO gameDAO = new MemoryGameDAO();
+    private final UserDAO userDAO = DataAccessSelector.getUserDAO();
+    private final AuthDAO authDAO = DataAccessSelector.getAuthDAO();
+    private final GameDAO gameDAO = DataAccessSelector.getGameDAO();
 
 
     @Test

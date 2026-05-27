@@ -5,7 +5,7 @@ import model.GameData;
 
 public class SQLGameDAO implements GameDAO{
     public void createGame(GameData g) throws DataAccessException{
-
+        String statement = "INSERT INTO ";
     };
     public GameData getGame(int gameID) throws DataAccessException{
         return null;
@@ -14,6 +14,7 @@ public class SQLGameDAO implements GameDAO{
 
     };
     public void clearGames() throws DataAccessException{
-
+        String statement = "TRUNCATE TABLE gameList";
+        DatabaseManager.executeUpdate(statement);
     };
 }
