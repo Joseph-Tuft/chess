@@ -8,7 +8,7 @@ import java.sql.SQLException;
 public class DataAccessSelector {
     private static final boolean USE_SQL = true;
 
-    private static final String[] createStatements = {
+    private static final String[] CREATE_STATEMENTS = {
             """
             CREATE TABLE IF NOT EXISTS  authList (
               `id` int NOT NULL AUTO_INCREMENT,
@@ -68,7 +68,7 @@ public class DataAccessSelector {
     private static void configureDatabase() throws ResponseException {
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
+            for (String statement : CREATE_STATEMENTS) {
                 try (var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
                 }
