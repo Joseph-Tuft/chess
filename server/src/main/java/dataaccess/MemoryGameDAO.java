@@ -6,15 +6,18 @@ import dataaccess.exceptions.DataAccessException;
 import model.GameData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MemoryGameDAO implements GameDAO{
 
     public static final ArrayList<GameData> GAME_LIST = new ArrayList<>();
     public static int numGames = 1;
 
-    public void createGame(GameData g) throws DataAccessException {
-        GAME_LIST.add(g);
+    public int createGame(GameData g) throws DataAccessException {
+        GameData newGame= new GameData(numGames, g.whiteUsername(), g.blackUsername(), g.gameName(), g.game());
+        GAME_LIST.add(newGame);
         numGames++;
+        return newGame.gameID();
     }
 
     public GameData getGame(int gameID) throws DataAccessException{
@@ -24,6 +27,14 @@ public class MemoryGameDAO implements GameDAO{
             }
         }
         throw new BadRequestException("Error: bad request");
+    }
+
+    public ArrayList<List<String>> getGames() throws DataAccessException{
+        ArrayList<List<String>> returnStatement = new ArrayList<List<String>>();
+        for (GameData game : GAME_LIST){
+            returnStatement.add(List.of(String.valueOf(game.gameID()), game.whiteUsername(), game.blackUsername(), game.gameName()));
+        }
+        return returnStatement;
     }
 
     public void updateGame(String username, String playerColor, int gameID) throws DataAccessException{

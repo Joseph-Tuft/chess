@@ -1,10 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.exceptions.AlreadyTakenException;
-import dataaccess.exceptions.BadRequestException;
-import dataaccess.exceptions.CustomErrorException;
-import dataaccess.exceptions.UnauthorizedRequestException;
+import dataaccess.exceptions.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.ErrorResponse;
@@ -93,6 +90,9 @@ public class Server {
             ctx.status(403);
         } catch (CustomErrorException e){
             ctx.result(new Gson().toJson(new ErrorResponse(e.getMessage())));
+            ctx.status(500);
+        } catch (DataAccessException e){
+            ctx.result(new Gson().toJson(new ErrorResponse(String.format("Error: %s", e))));
             ctx.status(500);
         }
 

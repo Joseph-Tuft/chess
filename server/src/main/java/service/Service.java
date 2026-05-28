@@ -1,5 +1,6 @@
 package service;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.lang.reflect.Field;
 import chess.ChessGame;
@@ -81,8 +82,7 @@ public class Service {
         authDAO.getAuthFromAuth(request.authToken());
 
         GameData game = new GameData(MemoryGameDAO.numGames, null, null, request.gameName(), new ChessGame());
-        gameDAO.createGame(game);
-        return new CreateGameResponse(game.gameID());
+        return new CreateGameResponse(gameDAO.createGame(game));
     }
 
     public ListGamesResponse listGames(ListGamesRequest request) throws DataAccessException{
@@ -94,8 +94,10 @@ public class Service {
 
         //Make a list only containing information that will be sent in response
         ArrayList<GameDataResponse> responses = new ArrayList<>();
-        for (GameData game : MemoryGameDAO.GAME_LIST){
-            responses.add(new GameDataResponse(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName()));
+
+        ArrayList<List<String>> gameList = gameDAO.getGames();
+        for (List<String> game : gameList){
+            responses.add(new GameDataResponse(Integer.parseInt(game.get(0)), game.get(1), game.get(2), game.get(3)));
         }
 
         return new ListGamesResponse(responses);
