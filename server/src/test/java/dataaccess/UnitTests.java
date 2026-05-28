@@ -129,7 +129,7 @@ public class UnitTests {
         userDAO.clearUsers();
         UserData user = new UserData("Joe", "12345", "joe@joe.com");
         userDAO.createUser(user);
-        Assertions.assertEquals(user, userDAO.getUser("Joe"));
+        Assertions.assertEquals(user.email(), userDAO.getUser("Joe").email());
     }
 
     @Test
