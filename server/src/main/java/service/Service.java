@@ -9,6 +9,7 @@ import dataaccess.exceptions.*;
 import model.requests.*;
 import model.responses.*;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Service {
     private final UserDAO userDAO = DataAccessSelector.getUserDAO();
@@ -60,7 +61,7 @@ public class Service {
         authDAO.createAuth(auth);
 
         //Validate the password
-        if(!user.password().equals(request.password())){
+        if(!BCrypt.checkpw(request.password(), user.password())){
             throw new UnauthorizedRequestException("Error: unauthorized");
         }
 

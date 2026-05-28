@@ -207,7 +207,7 @@ public class ServiceTests {
         AuthData joeAuth = authDAO.getAuthFromUser(registerRequest.username());
         CreateGameRequest createGameRequest = new CreateGameRequest("Joes Game", joeAuth.authToken());
         service.createGame(createGameRequest);
-        Assertions.assertFalse(MemoryGameDAO.GAME_LIST.isEmpty());
+        Assertions.assertFalse(service.listGames(new ListGamesRequest(joeAuth.authToken())).games().isEmpty());
 
         service.clear();
 

@@ -2,6 +2,7 @@ package dataaccess;
 
 import dataaccess.exceptions.*;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,8 +12,9 @@ import java.sql.SQLException;
 public class SQLUserDAO implements UserDAO{
     public void createUser(UserData u) throws DataAccessException{
         String statement = "INSERT INTO userList (username, password, email) VALUES (?, ?, ?)";
+        String hashedPassword = BCrypt.hashpw(u.password(), BCrypt.gensalt());
         try {
-            DatabaseManager.executeUpdate(statement, u.username(), u.password(), u.email());
+            DatabaseManager.executeUpdate(statement, u.username(), hashedPassword, u.email());
         } catch (ResponseException e){
             throw new AlreadyTakenException(String.format("Error: already taken: %s", e));
         }
