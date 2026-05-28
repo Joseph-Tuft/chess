@@ -1,9 +1,13 @@
 package dataaccess;
 
+import chess.ChessGame;
 import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.exceptions.BadRequestException;
+import dataaccess.exceptions.ResponseException;
 import dataaccess.exceptions.UnauthorizedRequestException;
 import model.AuthData;
+import model.GameData;
+import model.UserData;
 import model.requests.*;
 import model.responses.CreateGameResponse;
 import org.junit.jupiter.api.Assertions;
@@ -20,199 +24,214 @@ public class UnitTests {
 
 
     @Test
-    @DisplayName("Register Success")
-    public void registerSuccess(){
-        service.clear();
-        RegisterRequest request = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(request);
-        Assertions.assertEquals(request.email(), userDAO.getUser(request.username()).email());
+    @DisplayName("Create Game Success")
+    public void createGameSuccess() {
+        gameDAO.clearGames();
+        GameData game = new GameData(1, null, null, "JoesGame", new ChessGame());
+        gameDAO.createGame(game);
+        Assertions.assertEquals(gameDAO.getGame(1), game);
     }
 
     @Test
-    @DisplayName("Register Bad Request")
-    public void registerFail(){
-        service.clear();
-        RegisterRequest request = new RegisterRequest("Joe", "12345", null);
-        Assertions.assertThrows(BadRequestException.class, () -> service.register(request));
+    @DisplayName("Create Game Fail")
+    public void registerFail() {
+        gameDAO.clearGames();
+        GameData game = new GameData(1, null, null, null, new ChessGame());
+        Assertions.assertThrows(ResponseException.class, () -> gameDAO.createGame(game));
     }
 
     @Test
-    @DisplayName("Login Success")
-    public void loginSuccess(){
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-        LoginRequest loginRequest = new LoginRequest("Joe", "12345");
-        Assertions.assertDoesNotThrow(() -> service.login(loginRequest));
+    @DisplayName("Get Game Success")
+    public void getGameSuccess() {
+        gameDAO.clearGames();
+        GameData game = new GameData(1, null, null, "JoesGame", new ChessGame());
+        gameDAO.createGame(game);
+        Assertions.assertEquals(game, gameDAO.getGame(1));
     }
 
     @Test
-    @DisplayName("Login Fail not Registered")
-    public void loginNotRegistered(){
-        service.clear();
-        LoginRequest loginRequest = new LoginRequest("joe", "12345");
-        Assertions.assertThrows(UnauthorizedRequestException.class, () -> service.login(loginRequest));
+    @DisplayName("Get Game Fail")
+    public void getGameFail() {
+        gameDAO.clearGames();
+        GameData game = new GameData(1, null, null, "JoesGame", new ChessGame());
+        gameDAO.createGame(game);
+        Assertions.assertThrows(BadRequestException.class, () -> gameDAO.getGame(2));
     }
 
     @Test
-    @DisplayName("Login Fail Wrong Password")
-    public void loginWrongPassword(){
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-        LoginRequest loginRequest = new LoginRequest("joe", "12346");
-        Assertions.assertThrows(UnauthorizedRequestException.class, () -> service.login(loginRequest));
+    @DisplayName("Get Games Success")
+    public void getGamesSuccess() {
+        gameDAO.clearGames();
+        GameData game = new GameData(1, null, null, "JoesGame", new ChessGame());
+        gameDAO.createGame(game);
+        GameData game2 = new GameData(2, null, null, "JoesGame2", new ChessGame());
+        gameDAO.createGame(game2);
+        Assertions.assertEquals(2, gameDAO.getGames().size());
     }
 
     @Test
-    @DisplayName("Logout Success")
-    public void logoutSuccess(){
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-        AuthData auth = authDAO.getAuthFromUser(registerRequest.username());
-        String authToken = auth.authToken();
-        LogoutRequest logoutRequest = new LogoutRequest(authToken);
-        service.logout(logoutRequest);
-        Assertions.assertThrows(UnauthorizedRequestException.class, () -> authDAO.getAuthFromAuth(authToken));
+    @DisplayName("Get Games Fail")
+    public void getGamesFail() {
+        gameDAO.clearGames();
+        Assertions.assertEquals(0, gameDAO.getGames().size());
     }
 
     @Test
-    @DisplayName("Logout Fail")
-    public void logoutFail(){
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-        LogoutRequest logoutRequest = new LogoutRequest("");
-        Assertions.assertThrows(UnauthorizedRequestException.class, () -> service.logout(logoutRequest));
+    @DisplayName("Update Game Success")
+    public void updateGameSuccess() {
+        gameDAO.clearGames();
+        GameData game = new GameData(1, null, null, "JoesGame", new ChessGame());
+        gameDAO.createGame(game);
+        gameDAO.updateGame("whitePlayer", "WHITE", game.gameID());
+        Assertions.assertEquals("whitePlayer", gameDAO.getGame(game.gameID()).whiteUsername());
     }
 
     @Test
-    @DisplayName("ListGames Success")
-    public void listGamesSuccess(){
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-        AuthData auth = authDAO.getAuthFromUser(registerRequest.username());
+    @DisplayName("Update Game Fail")
+    public void updateGameFail() {
+        gameDAO.clearGames();
+        GameData game = new GameData(1, null, null, "JoesGame", new ChessGame());
+        gameDAO.createGame(game);
 
-        ListGamesRequest listGamesRequest = new ListGamesRequest(auth.authToken());
-        Assertions.assertTrue(service.listGames(listGamesRequest).games().isEmpty());
-
-        CreateGameRequest createGameRequest = new CreateGameRequest("Joes Game", auth.authToken());
-        service.createGame(createGameRequest);
-        Assertions.assertFalse(service.listGames(listGamesRequest).games().isEmpty());
+        Assertions.assertThrows(BadRequestException.class, () -> gameDAO.updateGame("whitePlayer", "WHTE", game.gameID()));
     }
 
     @Test
-    @DisplayName("ListGames Fail")
-    public void listGamesFail(){
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-
-        ListGamesRequest listGamesRequest = new ListGamesRequest("");
-        Assertions.assertThrows(UnauthorizedRequestException.class, () -> service.listGames(listGamesRequest));
+    @DisplayName("Clear Game Success")
+    public void clearGameSuccess() {
+        gameDAO.clearGames();
+        GameData game = new GameData(1, null, null, "JoesGame", new ChessGame());
+        gameDAO.createGame(game);
+        gameDAO.clearGames();
+        Assertions.assertEquals(0, gameDAO.getGames().size());
     }
 
     @Test
-    @DisplayName("CreateGames Success")
-    public void createGamesSuccess(){
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-        AuthData auth = authDAO.getAuthFromUser(registerRequest.username());
-
-        CreateGameRequest createGameRequest = new CreateGameRequest("Joes Game", auth.authToken());
-        CreateGameResponse response = service.createGame(createGameRequest);
-
-        Assertions.assertEquals(gameDAO.getGame(response.gameID()).gameName(), createGameRequest.gameName());
+    @DisplayName("Create User Success")
+    public void createUserSuccess() {
+        userDAO.clearUsers();
+        UserData user = new UserData("Joe", "12345", "joe@joe.com");
+        userDAO.createUser(user);
+        Assertions.assertEquals(user.email(), userDAO.getUser("Joe").email());
     }
 
     @Test
-    @DisplayName("CreateGames Fail no Name Provided")
-    public void createGamesFail() {
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-        AuthData auth = authDAO.getAuthFromUser(registerRequest.username());
-
-        CreateGameRequest createGameRequest = new CreateGameRequest(null, auth.authToken());
-
-        Assertions.assertThrows(BadRequestException.class, () -> service.createGame(createGameRequest));
+    @DisplayName("Create Users Fail")
+    public void createUserFail() {
+        userDAO.clearUsers();
+        UserData user = new UserData("Joe", "12345", null);
+        Assertions.assertThrows(AlreadyTakenException.class, () -> userDAO.createUser(user));
     }
 
     @Test
-    @DisplayName("JoinGame Success")
-    public void joinGameSuccess(){
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-
-        AuthData joeAuth = authDAO.getAuthFromUser(registerRequest.username());
-        CreateGameRequest createGameRequest = new CreateGameRequest("Joes Game", joeAuth.authToken());
-        int gameID = service.createGame(createGameRequest).gameID();
-
-        JoinGameRequest joeRequest = new JoinGameRequest("WHITE", gameID, joeAuth.authToken());
-        Assertions.assertDoesNotThrow(() -> service.joinGame(joeRequest));
-
-        RegisterRequest registerRequest2 = new RegisterRequest("Bob", "12346", "bob@bob.com");
-        service.register(registerRequest2);
-        AuthData bobAuth = authDAO.getAuthFromUser(registerRequest2.username());
-
-        JoinGameRequest bobRequest = new JoinGameRequest("BLACK", gameID, bobAuth.authToken());
-        Assertions.assertDoesNotThrow(() -> service.joinGame(bobRequest));
+    @DisplayName("Get User Success")
+    public void getUserSuccess() {
+        userDAO.clearUsers();
+        UserData user = new UserData("Joe", "12345", "joe@joe.com");
+        userDAO.createUser(user);
+        Assertions.assertEquals(user, userDAO.getUser("Joe"));
     }
 
     @Test
-    @DisplayName("JoinGame Fail Bad Color")
-    public void joinGameFailBadColor() {
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-
-        AuthData joeAuth = authDAO.getAuthFromUser(registerRequest.username());
-        CreateGameRequest createGameRequest = new CreateGameRequest("Joes Game", joeAuth.authToken());
-        int gameID = service.createGame(createGameRequest).gameID();
-
-        JoinGameRequest joeRequest = new JoinGameRequest("WHIT", gameID, joeAuth.authToken());
-        Assertions.assertThrows(BadRequestException.class, () -> service.joinGame(joeRequest));
+    @DisplayName("Get User Fail")
+    public void getUserFail() {
+        userDAO.clearUsers();
+        UserData user = new UserData("Joe", "12345", "joe@joe.com");
+        userDAO.createUser(user);
+        Assertions.assertThrows(UnauthorizedRequestException.class, () -> userDAO.getUser("Joee"));
     }
 
     @Test
-    @DisplayName("JoinGame Fail Taken Color")
-    public void joinGameFailTakenColor(){
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
-
-        AuthData joeAuth = authDAO.getAuthFromUser(registerRequest.username());
-        CreateGameRequest createGameRequest = new CreateGameRequest("Joes Game", joeAuth.authToken());
-        int gameID = service.createGame(createGameRequest).gameID();
-
-        JoinGameRequest joeRequest = new JoinGameRequest("WHITE", gameID, joeAuth.authToken());
-        Assertions.assertDoesNotThrow(() -> service.joinGame(joeRequest));
-
-        RegisterRequest registerRequest2 = new RegisterRequest("Bob", "12346", "bob@bob.com");
-        service.register(registerRequest2);
-        AuthData bobAuth = authDAO.getAuthFromUser(registerRequest2.username());
-
-        JoinGameRequest bobRequest = new JoinGameRequest("WHITE", gameID, bobAuth.authToken());
-        Assertions.assertThrows(AlreadyTakenException.class, () -> service.joinGame(bobRequest));
+    @DisplayName("Clear Users")
+    public void clearUsers() {
+        userDAO.clearUsers();
+        UserData user = new UserData("Joe", "12345", "joe@joe.com");
+        userDAO.createUser(user);
+        userDAO.clearUsers();
+        Assertions.assertThrows(UnauthorizedRequestException.class, () -> userDAO.getUser("Joe"));
     }
 
     @Test
-    @DisplayName("Clear Success")
-    public void clearSuccess(){
-        service.clear();
-        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        service.register(registerRequest);
+    @DisplayName("Create Auth Success")
+    public void createAuthSuccess() {
+        authDAO.clearAuths();
+        AuthData auth = new AuthData("joeauth", "Joe");
+        authDAO.createAuth(auth);
+        Assertions.assertEquals(auth.username(), authDAO.getAuthFromAuth("joeauth").username());
+    }
 
-        AuthData joeAuth = authDAO.getAuthFromUser(registerRequest.username());
-        CreateGameRequest createGameRequest = new CreateGameRequest("Joes Game", joeAuth.authToken());
-        service.createGame(createGameRequest);
-        Assertions.assertFalse(service.listGames(new ListGamesRequest(joeAuth.authToken())).games().isEmpty());
+    @Test
+    @DisplayName("Create Auth Fail")
+    public void createAuthFail() {
+        authDAO.clearAuths();
+        AuthData auth = new AuthData("joeauth", null);
+        Assertions.assertThrows(ResponseException.class, () -> authDAO.createAuth(auth));
+    }
 
-        service.clear();
+    @Test
+    @DisplayName("Get Auth from Auth Success")
+    public void getAuthFromAuthSuccess() {
+        authDAO.clearAuths();
+        AuthData auth = new AuthData("joeauth", "Joe");
+        authDAO.createAuth(auth);
+        Assertions.assertEquals(authDAO.getAuthFromAuth("joeauth").username(), auth.username());
+    }
 
-        Assertions.assertTrue(MemoryGameDAO.GAME_LIST.isEmpty());
+    @Test
+    @DisplayName("Get Auth from Auth Fail")
+    public void getAuthFromAuthFail() {
+        authDAO.clearAuths();
+        AuthData auth = new AuthData("joeauth", "Joe");
+        authDAO.createAuth(auth);
+        Assertions.assertThrows(UnauthorizedRequestException.class, () -> authDAO.getAuthFromAuth("joeauths"));
+    }
+
+    @Test
+    @DisplayName("Get Auth from User Success")
+    public void getAuthFromUserSuccess() {
+        authDAO.clearAuths();
+        AuthData auth = new AuthData("joeauth", "Joe");
+        authDAO.createAuth(auth);
+        Assertions.assertEquals(authDAO.getAuthFromUser("Joe").authToken(), auth.authToken());
+    }
+
+    @Test
+    @DisplayName("Get Auth from User Fail")
+    public void getAuthFromUserFail() {
+        authDAO.clearAuths();
+        AuthData auth = new AuthData("joeauth", "Joe");
+        authDAO.createAuth(auth);
+        Assertions.assertThrows(UnauthorizedRequestException.class, () -> authDAO.getAuthFromUser("joeauths"));
+    }
+
+    @Test
+    @DisplayName("Delete Auth Success")
+    public void deleteAuthSuccess() {
+        authDAO.clearAuths();
+        AuthData auth = new AuthData("joeauth", "Joe");
+        authDAO.createAuth(auth);
+        authDAO.deleteAuth(auth);
+        Assertions.assertThrows(UnauthorizedRequestException.class, () -> authDAO.getAuthFromAuth("joeauth"));
+    }
+
+    @Test
+    @DisplayName("Delete Auth Fail")
+    public void deleteAuthFail() {
+        authDAO.clearAuths();
+        AuthData auth = new AuthData("joeauth", "Joe");
+        authDAO.createAuth(auth);
+        AuthData auth2 = new AuthData("joeauthh", "Joe");
+        authDAO.deleteAuth(auth2);
+        Assertions.assertNotNull(authDAO.getAuthFromAuth("joeauth"));
+    }
+
+    @Test
+    @DisplayName("Clear Auths")
+    public void clearAuths() {
+        authDAO.clearAuths();
+        AuthData auth = new AuthData("joeauth", "Joe");
+        authDAO.createAuth(auth);
+        authDAO.clearAuths();
+        Assertions.assertThrows(UnauthorizedRequestException.class, () -> authDAO.getAuthFromAuth("joeauth"));
     }
 }
