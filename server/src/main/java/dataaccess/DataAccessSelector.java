@@ -28,8 +28,7 @@ public class DataAccessSelector {
               PRIMARY KEY (`id`),
               INDEX(username),
               UNIQUE KEY (`username`),
-              INDEX(email),
-              UNIQUE KEY (`email`)
+              INDEX(email)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """,
             """
