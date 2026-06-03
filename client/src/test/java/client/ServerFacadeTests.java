@@ -86,5 +86,24 @@ public class ServerFacadeTests {
         Assertions.assertThrows(DataAccessException.class, ()->facade.logout(logoutRequest));
     }
 
+    @Test
+    @DisplayName("Create Game Success")
+    public void createGameSuccess() {
+        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
+        String auth = facade.register(registerRequest).authToken();
+        CreateGameRequest gameRequest = new CreateGameRequest("Game1", auth);
+        Assertions.assertDoesNotThrow(() -> facade.createGame(gameRequest));
+    }
+
+    @Test
+    @DisplayName("Create Game Fail")
+    public void createGameFail() {
+        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
+        String auth = facade.register(registerRequest).authToken();
+        CreateGameRequest gameRequest = new CreateGameRequest("Game1", auth);
+        facade.createGame(gameRequest);
+        Assertions.assertThrows(DataAccessException.class, () -> facade.createGame(gameRequest));
+    }
+
 
 }
