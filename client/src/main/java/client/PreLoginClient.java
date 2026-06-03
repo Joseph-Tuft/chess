@@ -2,11 +2,14 @@ package client;
 
 import dataaccess.exceptions.DataAccessException;
 import dataaccess.exceptions.UnauthorizedRequestException;
-import model.requests.LoginRequest;
-import model.requests.RegisterRequest;
+import model.GameData;
+import model.requests.*;
+import model.responses.*;
 
 import javax.xml.crypto.Data;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import static client.EscapeSequences.*;
@@ -15,6 +18,8 @@ import static client.EscapeSequences.*;
 public class PreLoginClient {
     private final ServerFacade server;
     private State state = State.PRELOGIN;
+    private String sessionAuth;
+    private Map<String, Integer> gameMap = new HashMap<>();
 
     public PreLoginClient(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
@@ -46,17 +51,29 @@ public class PreLoginClient {
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = tokens.length > 0 ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "register" -> register(params);
-                case "login" -> login(params);
-                case "quit" -> "quit";
-                default -> help();
-            };
-        }
-        catch(DataAccessException e) {
-            return e.getMessage();
-            }
+            return switch (state) {
+                case State.PRELOGIN -> switch (cmd) {
+                    case "register" -> register(params);
+                    case "login" -> login(params);
+                    case "quit" -> "quit";
+                    default -> help();
+                };
 
+                case State.LOGGEDIN -> switch (cmd) {
+                    case "logout" -> logout(params);
+                    case "create" -> createGame(params);
+                    case "list" -> listGames(params);
+                    case "join" -> joinGame(params);
+                    //case "observe" -> observeGame(params);
+                    default -> help();
+                };
+                case State.GAMEPLAY -> switch (cmd) {
+                    default -> help();
+                };
+            };
+        } catch(DataAccessException e) {
+            return e.getMessage();
+        }
     }
 
     private void printPrompt() {
@@ -64,12 +81,29 @@ public class PreLoginClient {
     }
 
     public String help(){
-        return """
-                register <USERNAME> <PASSWORD> <EMAIL>
-                login <USERNAME> <PASSWORD>
-                help - list commands
-                quit
-                """;
+        return switch (state) {
+            case State.PRELOGIN ->
+                    """
+                    register <USERNAME> <PASSWORD> <EMAIL>
+                    login <USERNAME> <PASSWORD>
+                    help - list commands
+                    quit
+                    """;
+            case State.LOGGEDIN ->
+                    """
+                    create <NAME> - a game
+                    list - games
+                    join <ID> [WHITE|BLACK] - a game
+                    observe <ID> - a game
+                    logout - when you are done
+                    quit - playing chess
+                    help - with possible commands
+                    """;
+            case State.GAMEPLAY ->
+                    """
+                    
+                    """;
+        };
     }
 
     private String register(String[] params){
@@ -78,11 +112,12 @@ public class PreLoginClient {
         }
         RegisterRequest request = new RegisterRequest(params[0], params[1], params[2]);
         try {
-            server.register(request);
+            RegisterResponse response = server.register(request);
             state = State.LOGGEDIN;
-            return "You have been successfully registered";
+            sessionAuth = response.authToken();
+            return "You have been successfully registered and logged in";
         } catch (DataAccessException e){
-            return e.toString();
+            return e.getMessage();
         }
     }
 
@@ -92,12 +127,107 @@ public class PreLoginClient {
         }
         LoginRequest request = new LoginRequest(params[0], params[1]);
         try{
-            server.login(request);
+            LoginResponse response = server.login(request);
             state = State.LOGGEDIN;
+            sessionAuth = response.authToken();
             return "You have been successfully logged in";
         } catch (DataAccessException e){
             return e.toString();
         }
+    }
+
+    private String logout(String[] params){
+        LogoutRequest request = new LogoutRequest(sessionAuth);
+        try{
+            server.logout(request);
+            state = State.PRELOGIN;
+            return "You have been successfully logged out";
+        } catch (DataAccessException e) {
+            return String.format("Authtoken: %s", sessionAuth) + e.toString();
+        }
+    }
+
+    private String createGame(String[] params){
+        if (params.length < 1){
+            params = Arrays.copyOf(params, 1);
+        }
+        CreateGameRequest request = new CreateGameRequest(params[0], sessionAuth);
+        try{
+            server.createGame(request);
+            return "Game successfully created";
+        } catch (DataAccessException e) {
+            return e.getMessage();
+        }
+    }
+
+    private String listGames(String[] params){
+        ListGamesRequest request = new ListGamesRequest(sessionAuth);
+        try{
+            ListGamesResponse response = server.listGames(request);
+            StringBuilder sb = new StringBuilder();
+            int i = 1;
+            for (GameDataResponse game : response.games()){
+                sb.append(String.format("%d. %s, White Player: %s, Black Player: %s\n", i,
+                        game.gameName(),
+                        (game.whiteUsername()!=null) ? game.whiteUsername() : "None",
+                        (game.blackUsername()!=null) ? game.blackUsername() : "None"));
+                gameMap.put(String.valueOf(i++), game.gameID());
+            }
+            return sb.toString();
+        } catch (DataAccessException e) {
+            return e.getMessage();
+        }
+    }
+
+    private String joinGame(String[] params){
+        if (params.length < 2){
+            params = Arrays.copyOf(params, 2);
+        }
+        Integer ID = gameMap.get(params[0]);
+        if (ID==null){
+            return "Error: ID must be a number and correspond to a game in the game list";
+        }
+        JoinGameRequest request = new JoinGameRequest(params[1], ID, sessionAuth);
+        try{
+            server.joinGame(request);
+            state = State.GAMEPLAY;
+            return "Successfully joined game";
+        } catch (DataAccessException e){
+            return e.toString();
+        }
+    }
+
+    private String observeGame(String[] params){
+        if (params.length < 1){
+            params = Arrays.copyOf(params, 1);
+        }
+        Integer ID = gameMap.get(params[0]);
+        if (ID==null){
+            return "Error: ID must be a number and correspond to a game in the game list";
+        }
+        try {
+            state = State.GAMEPLAY;
+            return displayGame(ID);
+        } catch(DataAccessException e){
+            e.getMessage();
+        }
+        return "I dont know what im doing yet";
+    }
+
+    private String displayGame(Integer ID){
+        ListGamesRequest request = new ListGamesRequest(sessionAuth);
+        try{
+            ListGamesResponse response = server.listGames(request);
+            for (GameDataResponse game : response.games()){
+                if (ID.equals(game.gameID())){
+                    return null;
+                }
+            }
+            return null;
+        }catch(DataAccessException e){
+            return e.getMessage();
+        }
+
     }
 
 }

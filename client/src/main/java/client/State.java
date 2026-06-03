@@ -3,5 +3,5 @@ package client;
 public enum State {
         PRELOGIN,
         LOGGEDIN,
-        INGAME
+        GAMEPLAY
 }

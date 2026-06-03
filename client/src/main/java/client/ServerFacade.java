@@ -5,6 +5,7 @@ import dataaccess.exceptions.DataAccessException;
 import model.requests.*;
 import model.responses.*;
 
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -68,6 +69,13 @@ public class ServerFacade {
                 .method(method, makeRequestBody(body));
         if (body != null){
             request.setHeader("authorization", "application/json");
+        }
+        switch (body){
+            case LogoutRequest login -> request.setHeader("authorization", login.authToken());
+            case ListGamesRequest listGames -> request.setHeader("authorization", listGames.authToken());
+            case CreateGameRequest createGame -> request.setHeader("authorization", createGame.authToken());
+            case JoinGameRequest joinGame -> request.setHeader("authorization", joinGame.authToken());
+            default ->{}
         }
         return request.build();
     }
