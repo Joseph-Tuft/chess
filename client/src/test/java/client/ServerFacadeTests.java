@@ -68,5 +68,23 @@ public class ServerFacadeTests {
         Assertions.assertThrows(DataAccessException.class, ()->facade.login(loginRequest));
     }
 
+    @Test
+    @DisplayName("Logout Success")
+    public void logoutSuccess(){
+        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
+        String auth = facade.register(registerRequest).authToken();
+        LogoutRequest logoutRequest = new LogoutRequest(auth);
+        Assertions.assertDoesNotThrow(()->facade.logout(logoutRequest));
+    }
+
+    @Test
+    @DisplayName("Logout Fail")
+    public void logoutFail(){
+        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
+        facade.register(registerRequest);
+        LogoutRequest logoutRequest = new LogoutRequest("12345");
+        Assertions.assertThrows(DataAccessException.class, ()->facade.logout(logoutRequest));
+    }
+
 
 }
