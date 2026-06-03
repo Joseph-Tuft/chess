@@ -1,6 +1,6 @@
-package dataaccess.exceptions;
+package dataaccess;
 
-import dataaccess.DataAccessSelector;
+import dataaccess.exceptions.DataAccessException;
 
 public class ResponseException extends DataAccessException {
     public ResponseException(String message) {

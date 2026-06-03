@@ -2,12 +2,9 @@ package dataaccess;
 
 import dataaccess.exceptions.BadRequestException;
 import dataaccess.exceptions.DataAccessException;
-import dataaccess.exceptions.ResponseException;
 import dataaccess.exceptions.UnauthorizedRequestException;
 import model.AuthData;
-import model.UserData;
 
-import java.lang.module.ResolutionException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

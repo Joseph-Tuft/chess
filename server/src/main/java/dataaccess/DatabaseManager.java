@@ -1,11 +1,7 @@
 package dataaccess;
 
-import chess.ChessGame;
-import dataaccess.exceptions.BadRequestException;
 import dataaccess.exceptions.DataAccessException;
-import dataaccess.exceptions.ResponseException;
 
-import java.lang.module.ResolutionException;
 import java.sql.*;
 import java.util.Properties;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;

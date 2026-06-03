@@ -6,9 +6,9 @@ import java.lang.reflect.Field;
 import chess.ChessGame;
 import dataaccess.*;
 import dataaccess.exceptions.*;
+import model.*;
 import model.requests.*;
 import model.responses.*;
-import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class Service {

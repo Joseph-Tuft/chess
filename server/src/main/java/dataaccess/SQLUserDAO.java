@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SQLUserDAO implements UserDAO{
-    public void createUser(UserData u) throws DataAccessException{
+    public void createUser(UserData u) throws DataAccessException {
         String statement = "INSERT INTO userList (username, password, email) VALUES (?, ?, ?)";
         String hashedPassword = BCrypt.hashpw(u.password(), BCrypt.gensalt());
         try {
