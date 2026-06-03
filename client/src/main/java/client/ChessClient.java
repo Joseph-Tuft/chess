@@ -185,17 +185,17 @@ public class ChessClient {
         if (params.length < 2){
             params = Arrays.copyOf(params, 2);
         }
-        Integer ID = gameMap.get(params[0]);
-        if (ID==null){
+        Integer id = gameMap.get(params[0]);
+        if (id==null){
             return "Error: ID must be a number and correspond to a game in the game list";
         }
         String playerColor = (params[1] != null) ? params[1].toUpperCase() : null;
-        JoinGameRequest request = new JoinGameRequest(playerColor, ID, sessionAuth);
+        JoinGameRequest request = new JoinGameRequest(playerColor, id, sessionAuth);
         try{
             server.joinGame(request);
             state = State.GAMEPLAY;
             ChessGame.TeamColor color = (playerColor == "WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-            return displayGame(ID, color);
+            return displayGame(id, color);
         } catch (DataAccessException e){
             return e.getMessage();
         }
@@ -205,19 +205,19 @@ public class ChessClient {
         if (params.length < 1){
             params = Arrays.copyOf(params, 1);
         }
-        Integer ID = gameMap.get(params[0]);
-        if (ID==null){
+        Integer id = gameMap.get(params[0]);
+        if (id==null){
             return "Error: ID must be a number and correspond to a game in the game list";
         }
         try {
             state = State.GAMEPLAY;
-            return displayGame(ID, ChessGame.TeamColor.WHITE);
+            return displayGame(id, ChessGame.TeamColor.WHITE);
         } catch(DataAccessException e){
             return e.getMessage();
         }
     }
 
-    private String displayGame(Integer ID, ChessGame.TeamColor color){
+    private String displayGame(Integer id, ChessGame.TeamColor color){
         ChessGame game = new ChessGame();
         DisplayGame display = new DisplayGame(game, color);
         display.displayGame();

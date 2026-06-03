@@ -140,8 +140,8 @@ public class ServerFacadeTests {
         RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
         String auth = facade.register(registerRequest).authToken();
         CreateGameRequest gameRequest1 = new CreateGameRequest("Game1", auth);
-        int ID = facade.createGame(gameRequest1).gameID();
-        JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE", ID, auth);
+        int id = facade.createGame(gameRequest1).gameID();
+        JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE", id, auth);
         Assertions.assertDoesNotThrow(() -> facade.joinGame(joinGameRequest));
     }
 
@@ -151,8 +151,8 @@ public class ServerFacadeTests {
         RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
         String auth = facade.register(registerRequest).authToken();
         CreateGameRequest gameRequest1 = new CreateGameRequest("Game1", auth);
-        int ID = facade.createGame(gameRequest1).gameID();
-        JoinGameRequest joinGameRequest = new JoinGameRequest("WHIT", ID, auth);
+        int id = facade.createGame(gameRequest1).gameID();
+        JoinGameRequest joinGameRequest = new JoinGameRequest("WHIT", id, auth);
         Assertions.assertThrows(DataAccessException.class, () -> facade.joinGame(joinGameRequest));
     }
 
