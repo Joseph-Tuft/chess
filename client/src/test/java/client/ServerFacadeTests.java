@@ -134,5 +134,27 @@ public class ServerFacadeTests {
         Assertions.assertThrows(DataAccessException.class, ()->facade.listGames(listGamesRequest));
     }
 
+    @Test
+    @DisplayName("Join Game Success")
+    public void joinGameSuccess() {
+        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
+        String auth = facade.register(registerRequest).authToken();
+        CreateGameRequest gameRequest1 = new CreateGameRequest("Game1", auth);
+        int ID = facade.createGame(gameRequest1).gameID();
+        JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE", ID, auth);
+        Assertions.assertDoesNotThrow(() -> facade.joinGame(joinGameRequest));
+    }
+
+    @Test
+    @DisplayName("Join Game Fail")
+    public void joinGameFail() {
+        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
+        String auth = facade.register(registerRequest).authToken();
+        CreateGameRequest gameRequest1 = new CreateGameRequest("Game1", auth);
+        int ID = facade.createGame(gameRequest1).gameID();
+        JoinGameRequest joinGameRequest = new JoinGameRequest("WHIT", ID, auth);
+        Assertions.assertThrows(DataAccessException.class, () -> facade.joinGame(joinGameRequest));
+    }
+
 
 }
