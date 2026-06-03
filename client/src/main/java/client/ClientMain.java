@@ -1,7 +1,5 @@
 package client;
 
-import chess.*;
-
 public class ClientMain {
     public static void main(String[] args) {
         String serverUrl = "http://localhost:8080";
@@ -10,7 +8,7 @@ public class ClientMain {
         }
 
         try {
-            new PreLoginClient(serverUrl).preLoginRun();
+            new ChessClient(serverUrl).preLoginRun();
 
         } catch (Throwable ex) {
             System.out.printf("Unable to start server: %s%n", ex.getMessage());

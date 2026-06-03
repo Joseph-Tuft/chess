@@ -1,12 +1,11 @@
 package client;
 
+import chess.ChessGame;
 import dataaccess.exceptions.DataAccessException;
-import dataaccess.exceptions.UnauthorizedRequestException;
-import model.GameData;
 import model.requests.*;
 import model.responses.*;
+import ui.DisplayGame;
 
-import javax.xml.crypto.Data;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,13 +14,13 @@ import java.util.Scanner;
 import static client.EscapeSequences.*;
 
 
-public class PreLoginClient {
+public class ChessClient {
     private final ServerFacade server;
     private State state = State.PRELOGIN;
     private String sessionAuth;
     private Map<String, Integer> gameMap = new HashMap<>();
 
-    public PreLoginClient(String serverUrl) throws DataAccessException {
+    public ChessClient(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
     }
 
@@ -58,16 +57,17 @@ public class PreLoginClient {
                     case "quit" -> "quit";
                     default -> help();
                 };
-
                 case State.LOGGEDIN -> switch (cmd) {
                     case "logout" -> logout(params);
                     case "create" -> createGame(params);
                     case "list" -> listGames(params);
                     case "join" -> joinGame(params);
-                    //case "observe" -> observeGame(params);
+                    case "observe" -> observeGame(params);
                     default -> help();
                 };
                 case State.GAMEPLAY -> switch (cmd) {
+                    case "leave" -> leaveGame(params);
+                    case "quit" -> "quit";
                     default -> help();
                 };
             };
@@ -77,7 +77,7 @@ public class PreLoginClient {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + RESET + ">>> " + GREEN);
+        System.out.print("\n" + RESET + String.format("%s >>> ", state) + GREEN);
     }
 
     public String help(){
@@ -101,7 +101,9 @@ public class PreLoginClient {
                     """;
             case State.GAMEPLAY ->
                     """
-                    
+                    leave - game
+                    quit - playing chess
+                    help - with possible commands
                     """;
         };
     }
@@ -132,7 +134,7 @@ public class PreLoginClient {
             sessionAuth = response.authToken();
             return "You have been successfully logged in";
         } catch (DataAccessException e){
-            return e.toString();
+            return e.getMessage();
         }
     }
 
@@ -143,7 +145,7 @@ public class PreLoginClient {
             state = State.PRELOGIN;
             return "You have been successfully logged out";
         } catch (DataAccessException e) {
-            return String.format("Authtoken: %s", sessionAuth) + e.toString();
+            return e.getMessage();
         }
     }
 
@@ -187,13 +189,15 @@ public class PreLoginClient {
         if (ID==null){
             return "Error: ID must be a number and correspond to a game in the game list";
         }
-        JoinGameRequest request = new JoinGameRequest(params[1], ID, sessionAuth);
+        String playerColor = (params[1] != null) ? params[1].toUpperCase() : null;
+        JoinGameRequest request = new JoinGameRequest(playerColor, ID, sessionAuth);
         try{
             server.joinGame(request);
             state = State.GAMEPLAY;
-            return "Successfully joined game";
+            ChessGame.TeamColor color = (playerColor == "WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            return displayGame(ID, color);
         } catch (DataAccessException e){
-            return e.toString();
+            return e.getMessage();
         }
     }
 
@@ -207,27 +211,22 @@ public class PreLoginClient {
         }
         try {
             state = State.GAMEPLAY;
-            return displayGame(ID);
+            return displayGame(ID, ChessGame.TeamColor.WHITE);
         } catch(DataAccessException e){
-            e.getMessage();
-        }
-        return "I dont know what im doing yet";
-    }
-
-    private String displayGame(Integer ID){
-        ListGamesRequest request = new ListGamesRequest(sessionAuth);
-        try{
-            ListGamesResponse response = server.listGames(request);
-            for (GameDataResponse game : response.games()){
-                if (ID.equals(game.gameID())){
-                    return null;
-                }
-            }
-            return null;
-        }catch(DataAccessException e){
             return e.getMessage();
         }
+    }
 
+    private String displayGame(Integer ID, ChessGame.TeamColor color){
+        ChessGame game = new ChessGame();
+        DisplayGame display = new DisplayGame(game, color);
+        display.displayGame();
+        return "";
+    }
+
+    private String leaveGame(String[] params){
+        state = State.LOGGEDIN;
+        return "Successfully left the game";
     }
 
 }

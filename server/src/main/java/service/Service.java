@@ -89,7 +89,6 @@ public class Service {
     public ListGamesResponse listGames(ListGamesRequest request) throws DataAccessException{
         //Validate request
         checkNullFields(request);
-
         //Validate authToken
         authDAO.getAuthFromAuth(request.authToken());
 

@@ -16,7 +16,7 @@ public class SQLUserDAO implements UserDAO{
         try {
             DatabaseManager.executeUpdate(statement, u.username(), hashedPassword, u.email());
         } catch (ResponseException e){
-            throw new AlreadyTakenException(String.format("Error: already taken: %s", e));
+            throw new AlreadyTakenException(String.format("Error: username already taken"));
         }
     };
 

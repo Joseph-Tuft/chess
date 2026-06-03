@@ -13,7 +13,7 @@ import java.util.Objects;
 public class ChessGame {
 
     private TeamColor turn = TeamColor.WHITE;
-    private ChessBoard board = new ChessBoard();
+    public ChessBoard board = new ChessBoard();
 
 
     public ChessGame() {
@@ -225,5 +225,10 @@ public class ChessGame {
     @Override
     public int hashCode() {
         return Objects.hash(turn, board);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s", board.toString());
     }
 }

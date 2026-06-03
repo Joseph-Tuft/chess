@@ -47,7 +47,7 @@ public class MemoryGameDAO implements GameDAO{
         } else if (playerColor.equals("BLACK") && tempGame.blackUsername() == null){
             game = new GameData(tempGame.gameID(), tempGame.whiteUsername(), username, tempGame.gameName(), tempGame.game());
         } else if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")){
-            throw new BadRequestException("Error: bad request");
+            throw new BadRequestException("Error: bad request its actually");
         } else {throw new AlreadyTakenException("Error: already taken");}
 
         GAME_LIST.remove(tempGame);
