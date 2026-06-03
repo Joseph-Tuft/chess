@@ -46,12 +46,5 @@ public class ServerFacadeTests {
         Assertions.assertThrows(DataAccessException.class, ()->facade.register(request));
     }
 
-    @Test
-    @DisplayName("Register Fail")
-    public void registerFailed(){
-        RegisterRequest request = new RegisterRequest("Joe", "12345", "joe@joe.com");
-        facade.register(request);
-        Assertions.assertThrows(DataAccessException.class, ()->facade.register(request));
-    }
 
 }
