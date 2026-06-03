@@ -12,12 +12,14 @@ public class ServerFacadeTests {
 
     private static Server server;
     private final Service service = new Service();
-    private final ServerFacade facade = new ServerFacade("http://localhost:8080");
+
+    private static ServerFacade facade;
 
     @BeforeAll
     public static void init() {
         server = new Server();
         var port = server.run(0);
+        facade = new ServerFacade(String.format("http://localhost:%d", port));
         System.out.println("Started test HTTP server on " + port);
     }
 
