@@ -105,5 +105,34 @@ public class ServerFacadeTests {
         Assertions.assertThrows(DataAccessException.class, () -> facade.createGame(gameRequest));
     }
 
+    @Test
+    @DisplayName("List Game Success")
+    public void listGameSuccess() {
+        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
+        String auth = facade.register(registerRequest).authToken();
+        CreateGameRequest gameRequest1 = new CreateGameRequest("Game1", auth);
+        CreateGameRequest gameRequest2 = new CreateGameRequest("Game2", auth);
+        Assertions.assertDoesNotThrow(() -> facade.createGame(gameRequest1));
+        Assertions.assertDoesNotThrow(() -> facade.createGame(gameRequest2));
+
+        ListGamesRequest listGamesRequest = new ListGamesRequest(auth);
+        ListGamesResponse response = facade.listGames(listGamesRequest);
+        Assertions.assertEquals(2, response.games().size());
+    }
+
+    @Test
+    @DisplayName("List Game Fail")
+    public void listGameFail() {
+        RegisterRequest registerRequest = new RegisterRequest("Joe", "12345", "joe@joe.com");
+        String auth = facade.register(registerRequest).authToken();
+        CreateGameRequest gameRequest1 = new CreateGameRequest("Game1", auth);
+        CreateGameRequest gameRequest2 = new CreateGameRequest("Game2", auth);
+        Assertions.assertDoesNotThrow(() -> facade.createGame(gameRequest1));
+        Assertions.assertDoesNotThrow(() -> facade.createGame(gameRequest2));
+
+        ListGamesRequest listGamesRequest = new ListGamesRequest("12345");
+        Assertions.assertThrows(DataAccessException.class, ()->facade.listGames(listGamesRequest));
+    }
+
 
 }
