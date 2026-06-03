@@ -12,6 +12,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -101,7 +102,8 @@ public class ServerFacade {
         if(!isSuccessful(status)){
             var body = response.body();
             if (body!= null) {
-                throw new DataAccessException(body);
+                HashMap<String, String> errorMap = new Gson().fromJson(response.body(), HashMap.class);
+                throw new DataAccessException(errorMap.get("message"));
             }
             throw new DataAccessException("From handle Response in Server Facade");
         }
