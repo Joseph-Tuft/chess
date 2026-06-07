@@ -35,7 +35,7 @@ public class DisplayGame {
     }
 
     private void drawHeaderRow(PrintStream out){
-        out.print(SET_BG_COLOR_BLACK);
+        out.print(SET_BG_COLOR_DARK_BROWN);
         out.print(SET_TEXT_COLOR_WHITE);
         out.print(EMPTY);
         if (color == ChessGame.TeamColor.WHITE) {
@@ -49,15 +49,19 @@ public class DisplayGame {
 
     private void drawBody(PrintStream out) {
         for (int i = 0; i < 8; i++) {
-            out.print(SET_BG_COLOR_BLACK);
+            out.print(SET_BG_COLOR_DARK_BROWN);
             out.print(SET_TEXT_COLOR_WHITE);
-            out.print(String.format(" %d ", 8 - i));
+            if (color.equals(ChessGame.TeamColor.WHITE)) {
+                out.print(String.format(" %d ", 8 - i));
+            } else {
+                out.print(String.format(" %d ", i+1));
+            }
 
             for (int j = 0; j < 8; j++) {
                 if ((i + j) % 2 == 0) {
-                    out.print(SET_BG_COLOR_CYAN);
+                    out.print(SET_BG_COLOR_LIGHT_BROWN);
                 } else {
-                    out.print(SET_BG_COLOR_MAGENTA);
+                    out.print(SET_BG_COLOR_DARK_BROWN);
                 }
                 if (board.board[i][j] == null) {
                     out.print(EMPTY);
@@ -66,9 +70,13 @@ public class DisplayGame {
                 }
             }
 
-            out.print(SET_BG_COLOR_BLACK);
+            out.print(SET_BG_COLOR_DARK_BROWN);
             out.print(SET_TEXT_COLOR_WHITE);
-            out.print(String.format(" %d ", 8 - i));
+            if (color.equals(ChessGame.TeamColor.WHITE)) {
+                out.print(String.format(" %d ", 8 - i));
+            } else {
+                out.print(String.format(" %d ", i+1));
+            }
             out.println(SET_BG_COLOR_WHITE);
         }
     }

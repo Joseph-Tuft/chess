@@ -6,10 +6,7 @@ import model.requests.*;
 import model.responses.*;
 import ui.DisplayGame;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import static client.EscapeSequences.*;
 
@@ -194,7 +191,7 @@ public class ChessClient {
         try{
             server.joinGame(request);
             state = State.GAMEPLAY;
-            ChessGame.TeamColor color = (playerColor == "WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            ChessGame.TeamColor color = (Objects.equals(playerColor, "WHITE")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
             return displayGame(id, color);
         } catch (DataAccessException e){
             return e.getMessage();
