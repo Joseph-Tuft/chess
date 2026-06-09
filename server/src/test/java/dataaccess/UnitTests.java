@@ -79,7 +79,7 @@ public class UnitTests {
         gameDAO.clearGames();
         GameData game = new GameData(1, null, null, "JoesGame", new ChessGame());
         gameDAO.createGame(game);
-        gameDAO.updateGame("whitePlayer", "WHITE", game.gameID());
+        gameDAO.joinGame("whitePlayer", "WHITE", game.gameID());
         Assertions.assertEquals("whitePlayer", gameDAO.getGame(game.gameID()).whiteUsername());
     }
 
@@ -90,7 +90,7 @@ public class UnitTests {
         GameData game = new GameData(1, null, null, "JoesGame", new ChessGame());
         gameDAO.createGame(game);
 
-        Assertions.assertThrows(BadRequestException.class, () -> gameDAO.updateGame("whitePlayer", "WHTE", game.gameID()));
+        Assertions.assertThrows(BadRequestException.class, () -> gameDAO.joinGame("whitePlayer", "WHTE", game.gameID()));
     }
 
     @Test

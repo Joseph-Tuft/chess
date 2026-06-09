@@ -16,9 +16,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SQLGameDAO implements GameDAO{
+    private static final Gson SERIALIZER = new Gson();
+
     public int createGame(GameData g) throws DataAccessException{
-        var serializer = new Gson();
-        var gameJson = serializer.toJson(g.game());
+
+        var gameJson = SERIALIZER.toJson(g.game());
         String statement = "INSERT INTO gameList (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
         return (DatabaseManager.executeUpdate(statement, g.whiteUsername(), g.blackUsername(), g.gameName(), gameJson));
     };
@@ -67,7 +69,7 @@ public class SQLGameDAO implements GameDAO{
         }
     }
 
-    public void updateGame(String username, String playerColor, int gameID) throws DataAccessException{
+    public void joinGame(String username, String playerColor, int gameID) throws DataAccessException{
         GameData tempGame = getGame(gameID);
 
         String command = "UPDATE gameList SET whiteUsername = ?, blackUsername = ? WHERE gameID = ?";
@@ -79,8 +81,16 @@ public class SQLGameDAO implements GameDAO{
         } else if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")){
             throw new BadRequestException("Error: bad request");
         } else {throw new AlreadyTakenException("Error: already taken");}
-
     }
+
+    public void makeMove(Integer gameID, ChessGame game){
+        var gameJson = SERIALIZER.toJson(game);
+
+        String command = "UPDATE gameList SET game = ? WHERE gameID = ?";
+
+        DatabaseManager.executeUpdate(command, gameJson, gameID);
+    }
+
 
     public void clearGames() throws DataAccessException{
         String statement = "TRUNCATE TABLE gameList";

@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import dataaccess.exceptions.AlreadyTakenException;
 import dataaccess.exceptions.BadRequestException;
 import dataaccess.exceptions.DataAccessException;
@@ -37,7 +38,7 @@ public class MemoryGameDAO implements GameDAO{
         return returnStatement;
     }
 
-    public void updateGame(String username, String playerColor, int gameID) throws DataAccessException{
+    public void joinGame(String username, String playerColor, int gameID) throws DataAccessException{
         GameData tempGame = getGame(gameID);
 
         final GameData game;
@@ -53,6 +54,8 @@ public class MemoryGameDAO implements GameDAO{
         GAME_LIST.remove(tempGame);
         GAME_LIST.add(game);
     }
+
+    public void makeMove(Integer gameID, ChessGame game){};
 
     public void clearGames() throws DataAccessException{
         GAME_LIST.clear();

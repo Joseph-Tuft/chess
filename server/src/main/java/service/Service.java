@@ -111,7 +111,7 @@ public class Service {
         AuthData auth = authDAO.getAuthFromAuth(request.authToken());
 
         //Join game, check if color is already taken
-        gameDAO.updateGame(auth.username(), request.playerColor(), request.gameID());
+        gameDAO.joinGame(auth.username(), request.playerColor(), request.gameID());
         return new EmptyRecord();
     }
 

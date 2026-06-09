@@ -7,15 +7,21 @@ import io.javalin.http.Context;
 import model.ErrorResponse;
 import model.requests.*;
 import service.Service;
+import websocket.WebSocketHandler;
 
 import java.util.function.Supplier;
 
 public class Server {
+
+    private final WebSocketHandler webSocketHandler;
     private final Service service = new Service();
 
     private final Javalin javalin;
 
     public Server() {
+
+        webSocketHandler = new WebSocketHandler();
+
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
@@ -26,7 +32,11 @@ public class Server {
         javalin.post("/game", this::createGame);
         javalin.get("/game", this::listGames);
         javalin.put("/game", this::joinGame);
-        //javalin.ws();
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
+        });
     }
 
     public int run(int desiredPort) {
