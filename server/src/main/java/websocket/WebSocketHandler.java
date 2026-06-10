@@ -48,8 +48,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     MakeMove moveCmd = new Gson().fromJson(ctx.message(), MakeMove.class);
 
                 }
-//                case LEAVE -> ;
-//                case RESIGN -> ;
+                case LEAVE -> leave(command.getAuthToken(), command.getGameID(), ctx.session);
+                case RESIGN -> resign(command.getAuthToken(), command.getGameID(), ctx.session);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -75,17 +75,38 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void makeMove(String authToken, Integer gameID, ChessMove move, Session session) throws IOException{
         ChessGame game = gameDAO.getGame(gameID).game();
-        try {
-            game.makeMove(move);
-        } catch (InvalidMoveException e){
-            connections.reply(session, new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
+        if (game.gameStatus.equals(1)){
+            ErrorMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: Game is over");
+            connections.reply(session, errorMessage);
+        } else {
+            try {
+                game.makeMove(move);
+            } catch (InvalidMoveException e) {
+                connections.reply(session, new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
+            }
+            gameDAO.makeMove(gameID, game);
+            String gameJson = SERIALIZER.toJson(game);
+            connections.broadcast(gameID, null, new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, gameJson));
         }
-        gameDAO.makeMove(gameID, game);
-        String gameJson = SERIALIZER.toJson(game);
-        connections.broadcast(gameID, null, new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, gameJson));
     }
 
-    private void leave(){}
+    private void leave(String authToken, Integer gameID, Session session) throws IOException{
+        String username = authDAO.getAuthFromAuth(authToken).username();
+        gameDAO.leaveGame(username, gameID);
+        connections.remove(gameID, session);
+        connections.broadcast(gameID,
+                null,
+                new Notification(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s has left the game", username)));
+    }
+
+    private void resign(String authToken, Integer gameID, Session session) throws IOException{
+        String username = authDAO.getAuthFromAuth(authToken).username();
+        ChessGame game = gameDAO.getGame(gameID).game();
+        game.gameStatus = 1;
+        Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,
+                String.format("%s has resigned", username));
+        connections.broadcast(gameID, null, notification);
+    }
 
 
 }

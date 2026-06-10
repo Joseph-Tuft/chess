@@ -57,6 +57,8 @@ public class MemoryGameDAO implements GameDAO{
 
     public void makeMove(Integer gameID, ChessGame game){};
 
+    public void leaveGame(String username, int gameID) throws DataAccessException{};
+
     public void clearGames() throws DataAccessException{
         GAME_LIST.clear();
     }

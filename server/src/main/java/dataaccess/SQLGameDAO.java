@@ -83,7 +83,7 @@ public class SQLGameDAO implements GameDAO{
         } else {throw new AlreadyTakenException("Error: already taken");}
     }
 
-    public void makeMove(Integer gameID, ChessGame game){
+    public void makeMove(Integer gameID, ChessGame game) throws DataAccessException{
         var gameJson = SERIALIZER.toJson(game);
 
         String command = "UPDATE gameList SET game = ? WHERE gameID = ?";
@@ -91,13 +91,13 @@ public class SQLGameDAO implements GameDAO{
         DatabaseManager.executeUpdate(command, gameJson, gameID);
     }
 
-    public void leaveGame(String username, String playerColor, int gameID) throws DataAccessException{
+    public void leaveGame(String username, int gameID) throws DataAccessException{
         GameData tempGame = getGame(gameID);
         String command = "UPDATE gameList SET whiteUsername = ?, blackUsername = ? WHERE gameID = ?";
 
         if(username.equals(tempGame.whiteUsername())){
             DatabaseManager.executeUpdate(command, "", tempGame.blackUsername(), gameID);
-        } else {
+        } else if (username.equals(tempGame.blackUsername())){
             DatabaseManager.executeUpdate(command, tempGame.whiteUsername(), "", gameID);
         }
     }

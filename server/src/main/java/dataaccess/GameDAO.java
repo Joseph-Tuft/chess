@@ -13,5 +13,6 @@ public interface GameDAO {
     public ArrayList<List<String>> getGames() throws DataAccessException;
     public void joinGame(String username, String playerColor, int gameID) throws DataAccessException;
     public void clearGames() throws DataAccessException;
-    public void makeMove(Integer gameID, ChessGame game);
+    public void makeMove(Integer gameID, ChessGame game) throws DataAccessException;
+    public void leaveGame(String username, int gameID) throws DataAccessException;
 }
