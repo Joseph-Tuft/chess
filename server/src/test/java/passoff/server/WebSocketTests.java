@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static websocket.messages.ServerMessage.ServerMessageType.*;
 
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class WebSocketTests {
     private static WebsocketTestingEnvironment environment;
@@ -39,7 +40,8 @@ public class WebSocketTests {
         serverFacade = new TestServerFacade("localhost", port);
         serverFacade.clear();
         environment = new WebsocketTestingEnvironment("localhost", port, "/ws", TestFactory.getGsonBuilder());
-        waitTime = TestFactory.getMessageTime();
+        //waitTime = TestFactory.getMessageTime();
+        waitTime = 1500L;
     }
 
     @BeforeEach

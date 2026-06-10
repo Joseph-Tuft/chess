@@ -1,6 +1,6 @@
 package dataaccess.exceptions;
 
-public class BadRequestException extends RuntimeException {
+public class BadRequestException extends DataAccessException {
     public BadRequestException(String message) {
         super(message);
     }
