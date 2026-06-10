@@ -83,8 +83,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         gameDAO.makeMove(gameID, game);
         String gameJson = SERIALIZER.toJson(game);
         connections.broadcast(gameID, null, new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, gameJson));
-
     }
+
+    private void leave(){}
 
 
 }

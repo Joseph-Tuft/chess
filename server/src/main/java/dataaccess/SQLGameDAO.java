@@ -91,6 +91,17 @@ public class SQLGameDAO implements GameDAO{
         DatabaseManager.executeUpdate(command, gameJson, gameID);
     }
 
+    public void leaveGame(String username, String playerColor, int gameID) throws DataAccessException{
+        GameData tempGame = getGame(gameID);
+        String command = "UPDATE gameList SET whiteUsername = ?, blackUsername = ? WHERE gameID = ?";
+
+        if(username.equals(tempGame.whiteUsername())){
+            DatabaseManager.executeUpdate(command, "", tempGame.blackUsername(), gameID);
+        } else {
+            DatabaseManager.executeUpdate(command, tempGame.whiteUsername(), "", gameID);
+        }
+    }
+
 
     public void clearGames() throws DataAccessException{
         String statement = "TRUNCATE TABLE gameList";
