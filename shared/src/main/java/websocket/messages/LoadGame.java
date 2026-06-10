@@ -8,4 +8,9 @@ public class LoadGame extends ServerMessage{
         super(type);
         this.game = game;
     }
+
+    @Override
+    public String getMessage(){
+        return this.getMessage();
+    }
 }

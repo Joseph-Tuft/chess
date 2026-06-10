@@ -2,24 +2,34 @@ package client;
 
 import chess.ChessGame;
 import dataaccess.exceptions.*;
+import model.EmptyRecord;
 import model.requests.*;
 import model.responses.*;
 import ui.DisplayGame;
+import websocket.messages.ErrorMessage;
+import websocket.messages.Notification;
+import websocket.messages.ServerMessage;
 
 import java.util.*;
 
 import static client.EscapeSequences.*;
 
 
-public class ChessClient {
+public class ChessClient implements ServerMessageObserver {
     private final ServerFacade server;
+    private final WebSocketFacade ws;
     private State state = State.PRELOGIN;
     private String sessionAuth;
     private Map<String, Integer> gameMap = new HashMap<>();
 
     public ChessClient(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
+        ws = new WebSocketFacade(serverUrl, this);
     }
+
+    public void notify(ServerMessage serverMessage){
+        System.out.print(serverMessage.getMessage());
+    };
 
     public void preLoginRun(){
         System.out.println(LOGO + "Welcome to Chess, type 'help' to get started!");
