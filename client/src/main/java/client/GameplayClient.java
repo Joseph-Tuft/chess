@@ -13,6 +13,7 @@ import websocket.messages.LoadGame;
 import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
+import java.util.Scanner;
 
 import static ui.EscapeSequences.SET_TEXT_COLOR_BLACK;
 import static ui.EscapeSequences.SET_TEXT_COLOR_WHITE;
@@ -26,6 +27,7 @@ public class GameplayClient implements ServerMessageObserver {
     private ChessGame currentGame = new ChessGame();
 
     private final Gson SERIALIZER = new Gson();
+    Scanner scanner = new Scanner(System.in);
 
     public GameplayClient(String serverUrl) throws DataAccessException {
         ws = new WebSocketFacade(serverUrl, this);
@@ -54,8 +56,25 @@ public class GameplayClient implements ServerMessageObserver {
     }
 
     public String resign(){
-        ws.resign(sessionAuth, sessionID);
-        return "";
+        while(true) {
+            System.out.println("Are you sure you want to resign? [y/n]");
+            if (!scanner.hasNextLine()) {
+                return "Input stream closed. Action aborted.";
+            }
+            String line = scanner.nextLine();
+            if (line.isEmpty()) {
+                continue;
+            }
+            String response = line.toLowerCase();
+            if (response.charAt(0) == 'y') {
+                ws.resign(sessionAuth, sessionID);
+                return "";
+            } else if (response.charAt(0) == 'n') {
+                return "";
+            } else {
+                System.out.println("Invalid response. please type 'y' or 'n'");
+            }
+        }
     }
 
     public String redraw(){
