@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 
 import chess.*;
+import dataaccess.exceptions.BadRequestException;
+import dataaccess.exceptions.DataAccessException;
 
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.WHITE_PAWN;
@@ -20,13 +22,7 @@ public class DisplayGame {
         this.color = color;
         this.game = game;
         this.board = new ChessBoard(game.board);
-        if (color == ChessGame.TeamColor.BLACK){
-            for (int i = 0; i < 8; i++){
-                for (int j = 0; j < 8; j++){
-                    this.board.board[i][j] = game.board.board[7-i][7-j];
-                }
-            }
-        }
+
     }
 
     public void displayGame(){
@@ -38,12 +34,16 @@ public class DisplayGame {
 
     public void highlightGame(ChessPosition pos){
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        if (board.getPiece(pos) == null){
+            displayGame();
+            return;
+        }
         Collection<ChessMove> validMoves = game.validMoves(pos);
         Collection<ChessPosition> validPositions = validMoves.stream()
                 .map(ChessMove::getEndPosition)
                 .toList();
         drawHeaderRow(out);
-        drawHighlightedBody(out, validPositions);
+        drawHighlightedBody(out, validPositions, pos);
         drawHeaderRow(out);
     }
 
@@ -60,8 +60,21 @@ public class DisplayGame {
         out.println(SET_BG_COLOR_WHITE);
     }
 
-    private void configureSquare(PrintStream out, int i, int j, Collection<ChessPosition> positions){
-        ChessPosition pos = new ChessPosition(i + 1, j + 1);
+    private void configureSquare(PrintStream out, int i, int j, Collection<ChessPosition> positions, ChessPosition startPos){
+
+        int row;
+        int col;
+
+        if(color == ChessGame.TeamColor.WHITE){
+            row = 8 - i;
+            col = j + 1;
+        } else {
+            row = i + 1;
+            col = 8 - j;
+        }
+
+        ChessPosition pos = new ChessPosition(row, col);
+
         if ((i + j) % 2 == 0) {
             out.print(SET_BG_COLOR_LIGHT_BROWN);
             if (positions != null && positions.contains(pos)){
@@ -73,13 +86,18 @@ public class DisplayGame {
                 out.print(SET_BG_COLOR_DARK_BLUE);
             }
         }
+        if (positions != null && startPos != null && startPos.equals(pos)){
+            out.print(SET_BG_COLOR_YELLOW);
+            out.print(SET_TEXT_COLOR_BLACK);
+        }
+
     }
 
     private void drawBody(PrintStream out){
-        drawHighlightedBody(out, null);
+        drawHighlightedBody(out, null, null);
     }
 
-    private void drawHighlightedBody(PrintStream out, Collection<ChessPosition> positions) {
+    private void drawHighlightedBody(PrintStream out, Collection<ChessPosition> positions, ChessPosition startPos) {
         for (int i = 0; i < 8; i++) {
             out.print(SET_BG_COLOR_DARK_BROWN);
             out.print(SET_TEXT_COLOR_WHITE);
@@ -90,11 +108,16 @@ public class DisplayGame {
             }
 
             for (int j = 0; j < 8; j++) {
-                configureSquare(out, i, j, positions);
-                if (board.board[i][j] == null) {
+                configureSquare(out, i, j, positions, startPos);
+
+                int row = (color == ChessGame.TeamColor.WHITE) ? (7 - i) : i;
+                int col = (color == ChessGame.TeamColor.WHITE) ? j : (7 - j);
+
+                if (board.board[row][col] == null) {
                     out.print(EMPTY);
                 } else {
-                    drawPiece(out, i, j);
+                    drawPiece(out, row, col);
+                    out.print(SET_TEXT_COLOR_WHITE);
                 }
             }
 

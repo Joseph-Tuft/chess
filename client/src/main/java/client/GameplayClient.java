@@ -37,6 +37,10 @@ public class GameplayClient implements ServerMessageObserver {
             System.out.println();
             DisplayGame display = new DisplayGame(currentGame, sessionColor);
             display.displayGame();
+            if (currentGame.gameStatus == 1) {
+                System.out.println(SET_TEXT_COLOR_BLACK + String.format("%s's turn",
+                        (currentGame.turn.equals(ChessGame.TeamColor.WHITE) ? "White" : "Black")));
+            }
         } else {
             System.out.println(SET_TEXT_COLOR_BLACK + serverMessage.getMessage());
         }
@@ -60,7 +64,7 @@ public class GameplayClient implements ServerMessageObserver {
         return "";
     }
 
-    public ChessPosition getMove(String pos) throws BadRequestException {
+    public ChessPosition getPos(String pos) throws BadRequestException {
         if (pos == null || pos.length() != 2){
             throw new BadRequestException("Error: the position must be of the format ex: a2");
         }
@@ -69,12 +73,6 @@ public class GameplayClient implements ServerMessageObserver {
         }
         int col = pos.charAt(0) - 'a' + 1;
         int row = pos.charAt(1) - '0';
-        if (sessionColor.equals(ChessGame.TeamColor.WHITE)){
-            row = 9 - row;
-        }
-        if (sessionColor.equals(ChessGame.TeamColor.BLACK)){
-            col = 9 - col;
-        }
         return new ChessPosition(row, col);
     }
 
@@ -83,7 +81,7 @@ public class GameplayClient implements ServerMessageObserver {
             params = Arrays.copyOf(params, 1);
         }
         try {
-            ChessPosition pos = getMove(params[0]);
+            ChessPosition pos = getPos(params[0]);
             DisplayGame display = new DisplayGame(currentGame, sessionColor);
             display.highlightGame(pos);
             return "";
@@ -111,8 +109,8 @@ public class GameplayClient implements ServerMessageObserver {
             params = Arrays.copyOf(params, 4);
         }
         try {
-            ChessPosition startPos = getMove(params[0]);
-            ChessPosition endPos = getMove(params[2]);
+            ChessPosition startPos = getPos(params[0]);
+            ChessPosition endPos = getPos(params[2]);
             ChessMove move = new ChessMove(startPos, endPos, getPromotion(params[3]));
             ws.makeMove(sessionAuth, sessionID, move);
             return "";
