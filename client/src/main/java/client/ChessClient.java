@@ -18,7 +18,7 @@ import java.util.*;
 import static client.EscapeSequences.*;
 
 
-public class ChessClient implements ServerMessageObserver {
+public class ChessClient {
     private final ServerFacade server;
 
     private State state = State.PRELOGIN;
@@ -33,15 +33,6 @@ public class ChessClient implements ServerMessageObserver {
         server = new ServerFacade(serverUrl);
         gameplayClient = new GameplayClient(serverUrl);
     }
-
-    public void notify(ServerMessage serverMessage){
-        if (serverMessage instanceof LoadGame loadGame){
-            currentGame = SERIALIZER.fromJson(loadGame.getMessage(), ChessGame.class);
-            DisplayGame display = new DisplayGame(currentGame, sessionColor);
-            display.displayGame();
-        }
-        System.out.print(serverMessage.getMessage());
-    };
 
     public void preLoginRun(){
         System.out.println(LOGO + "Welcome to Chess, type 'help' to get started!");
@@ -85,8 +76,8 @@ public class ChessClient implements ServerMessageObserver {
                     default -> help();
                 };
                 case State.GAMEPLAY -> switch (cmd) {
-                    case "leave" -> leaveGame(params);
-                    case "move" ->;
+                    case "leave" -> leaveGame();
+                    case "move" ->gameplayClient.makeMove(params);
                     case "resign" -> gameplayClient.resign();
                     case "highlight" -> gameplayClient.highlight(params);
                     case "redraw" -> gameplayClient.redraw();
@@ -125,7 +116,7 @@ public class ChessClient implements ServerMessageObserver {
             case State.GAMEPLAY ->
                     """
                     redraw - the chessboard
-                    move [START POSITION][END POSITION] - ex(move [a2][a4])
+                    move START POSITION to END POSITION - ex(move a2 to a4)
                     highlight [POSITION] - pieces moves ex(highlight [a2])
                     leave - game
                     quit - playing chess
@@ -252,9 +243,10 @@ public class ChessClient implements ServerMessageObserver {
         return "";
     }
 
-    private String leaveGame(String[] params){
+    private String leaveGame(){
+        gameplayClient.leaveGame();
         state = State.LOGGEDIN;
-        return "Successfully left the game";
+        return "";
     }
 
 

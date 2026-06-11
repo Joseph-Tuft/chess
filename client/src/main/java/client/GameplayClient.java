@@ -1,7 +1,11 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import com.google.gson.Gson;
+import dataaccess.exceptions.BadRequestException;
 import dataaccess.exceptions.DataAccessException;
 import ui.DisplayGame;
 import websocket.commands.Connect;
@@ -47,27 +51,78 @@ public class GameplayClient implements ServerMessageObserver {
         return "";
     }
 
-    public void resign(){
+    public String resign(){
         ws.resign(sessionAuth, sessionID);
+        return "";
     }
 
-    public void redraw(){
+    public String redraw(){
         DisplayGame display = new DisplayGame(currentGame, sessionColor);
         display.displayGame();
+        return "";
+    }
+
+    public ChessPosition getMove(String pos) throws BadRequestException {
+        if (pos == null || pos.length() != 2){
+            throw new BadRequestException("Error: the position must be of the format ex: a2");
+        }
+        if(pos.charAt(0) < 'a' || pos.charAt(0) > 'h' || pos.charAt(1) < 1 || pos.charAt(1) > 8){
+            throw new BadRequestException("Error: the position must be of the format ex: a2");
+        }
+        int col = pos.charAt(0) - 'a' + 1;
+        int row = pos.charAt(1);
+        if (sessionColor.equals(ChessGame.TeamColor.BLACK)){
+            col = 9 - col;
+            row = 9 - row;
+        }
+        return new ChessPosition(row, col);
     }
 
     public String highlight(String params[]){
         if (params.length < 1){
             params = Arrays.copyOf(params, 1);
         }
-        if (params[0] == null){
-            return "Error: the position must be of the format [a2]";
+        try {
+            ChessPosition pos = getMove(params[0]);
+            DisplayGame display = new DisplayGame(currentGame, sessionColor);
+            display.highlightGame(pos);
+            return "";
+        } catch(DataAccessException e){
+            return e.getMessage();
         }
-        DisplayGame display = new DisplayGame(currentGame, sessionColor);
-        //display.highlightGame();
     }
 
+    public ChessPiece.PieceType getPromotion(String promote) throws BadRequestException {
+        if (promote == null){
+            return null;
+        }
+        promote = promote.toLowerCase();
+        return switch (promote){
+            case "queen" -> ChessPiece.PieceType.QUEEN;
+            case "rook" -> ChessPiece.PieceType.ROOK;
+            case "bishop" -> ChessPiece.PieceType.BISHOP;
+            case "knight" -> ChessPiece.PieceType.KNIGHT;
+            default -> throw new BadRequestException("Error: Invalid promotion piece");
+        };
+    }
 
+    public String makeMove(String params[]){
+        if (params.length < 4){
+            params = Arrays.copyOf(params, 4);
+        }
+        try {
+            ChessPosition startPos = getMove(params[0]);
+            ChessPosition endPos = getMove(params[2]);
+            ChessMove move = new ChessMove(startPos, endPos, getPromotion(params[3]));
+            ws.makeMove(sessionAuth, sessionID, move);
+            return "";
+        } catch (DataAccessException e){
+            return e.getMessage();
+        }
+    }
 
-
+    public String leaveGame(){
+        ws.leave(sessionAuth, sessionID);
+        return "";
+    }
 }
