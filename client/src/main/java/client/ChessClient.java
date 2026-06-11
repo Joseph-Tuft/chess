@@ -1,12 +1,15 @@
 package client;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import dataaccess.exceptions.*;
 import model.EmptyRecord;
 import model.requests.*;
 import model.responses.*;
 import ui.DisplayGame;
+import websocket.commands.Connect;
 import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
 
@@ -17,17 +20,26 @@ import static client.EscapeSequences.*;
 
 public class ChessClient implements ServerMessageObserver {
     private final ServerFacade server;
-    private final WebSocketFacade ws;
+
     private State state = State.PRELOGIN;
+
     private String sessionAuth;
+    private GameplayClient gameplayClient;
+
     private Map<String, Integer> gameMap = new HashMap<>();
+    private final Gson SERIALIZER = new Gson();
 
     public ChessClient(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
-        ws = new WebSocketFacade(serverUrl, this);
+        gameplayClient = new GameplayClient(serverUrl);
     }
 
     public void notify(ServerMessage serverMessage){
+        if (serverMessage instanceof LoadGame loadGame){
+            currentGame = SERIALIZER.fromJson(loadGame.getMessage(), ChessGame.class);
+            DisplayGame display = new DisplayGame(currentGame, sessionColor);
+            display.displayGame();
+        }
         System.out.print(serverMessage.getMessage());
     };
 
@@ -74,6 +86,10 @@ public class ChessClient implements ServerMessageObserver {
                 };
                 case State.GAMEPLAY -> switch (cmd) {
                     case "leave" -> leaveGame(params);
+                    case "move" ->;
+                    case "resign" -> gameplayClient.resign();
+                    case "highlight" -> gameplayClient.highlight(params);
+                    case "redraw" -> gameplayClient.redraw();
                     case "quit" -> "quit";
                     default -> help();
                 };
@@ -108,6 +124,9 @@ public class ChessClient implements ServerMessageObserver {
                     """;
             case State.GAMEPLAY ->
                     """
+                    redraw - the chessboard
+                    move [START POSITION][END POSITION] - ex(move [a2][a4])
+                    highlight [POSITION] - pieces moves ex(highlight [a2])
                     leave - game
                     quit - playing chess
                     help - with possible commands
@@ -201,8 +220,9 @@ public class ChessClient implements ServerMessageObserver {
         try{
             server.joinGame(request);
             state = State.GAMEPLAY;
-            ChessGame.TeamColor color = (Objects.equals(playerColor, "WHITE")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-            return displayGame(id, color);
+            ChessGame.TeamColor sessionColor = (Objects.equals(playerColor, "WHITE")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            gameplayClient.connect(sessionAuth, id, sessionColor, Connect.ConnectorType.PLAYER);
+            return "";
         } catch (DataAccessException e){
             return e.getMessage();
         }
@@ -218,7 +238,8 @@ public class ChessClient implements ServerMessageObserver {
         }
         try {
             state = State.GAMEPLAY;
-            return displayGame(id, ChessGame.TeamColor.WHITE);
+            gameplayClient.connect(sessionAuth, id, ChessGame.TeamColor.WHITE, Connect.ConnectorType.OBSERVER);
+            return"";
         } catch(DataAccessException e){
             return e.getMessage();
         }
@@ -235,5 +256,8 @@ public class ChessClient implements ServerMessageObserver {
         state = State.LOGGEDIN;
         return "Successfully left the game";
     }
+
+
+
 
 }

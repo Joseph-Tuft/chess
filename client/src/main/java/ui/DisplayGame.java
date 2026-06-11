@@ -1,22 +1,24 @@
 package ui;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
+import chess.*;
 
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.WHITE_PAWN;
 import static ui.EscapeSequences.WHITE_ROOK;
 
 public class DisplayGame {
+    private ChessGame game;
     private ChessBoard board;
     private ChessGame.TeamColor color;
 
     public DisplayGame(ChessGame game, ChessGame.TeamColor color){
         this.color = color;
+        this.game = game;
         this.board = new ChessBoard(game.board);
         if (color == ChessGame.TeamColor.BLACK){
             for (int i = 0; i < 8; i++){
@@ -34,6 +36,17 @@ public class DisplayGame {
         drawHeaderRow(out);
     }
 
+    public void highlightGame(ChessPosition pos){
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        Collection<ChessMove> validMoves = game.validMoves(pos);
+        Collection<ChessPosition> validPositions = validMoves.stream()
+                .map(ChessMove::getEndPosition)
+                .toList();
+        drawHeaderRow(out);
+        drawHighlightedBody(out, validPositions);
+        drawHeaderRow(out);
+    }
+
     private void drawHeaderRow(PrintStream out){
         out.print(SET_BG_COLOR_DARK_BROWN);
         out.print(SET_TEXT_COLOR_WHITE);
@@ -47,7 +60,26 @@ public class DisplayGame {
         out.println(SET_BG_COLOR_WHITE);
     }
 
-    private void drawBody(PrintStream out) {
+    private void configureSquare(PrintStream out, int i, int j, Collection<ChessPosition> positions){
+        ChessPosition pos = new ChessPosition(i + 1, j + 1);
+        if ((i + j) % 2 == 0) {
+            out.print(SET_BG_COLOR_LIGHT_BROWN);
+            if (positions != null && positions.contains(pos)){
+                out.print(SET_BG_COLOR_LIGHT_BLUE);
+            }
+        } else {
+            out.print(SET_BG_COLOR_DARK_BROWN);
+            if (positions != null && positions.contains(pos)){
+                out.print(SET_BG_COLOR_DARK_BLUE);
+            }
+        }
+    }
+
+    private void drawBody(PrintStream out){
+        drawHighlightedBody(out, null);
+    }
+
+    private void drawHighlightedBody(PrintStream out, Collection<ChessPosition> positions) {
         for (int i = 0; i < 8; i++) {
             out.print(SET_BG_COLOR_DARK_BROWN);
             out.print(SET_TEXT_COLOR_WHITE);
@@ -58,11 +90,7 @@ public class DisplayGame {
             }
 
             for (int j = 0; j < 8; j++) {
-                if ((i + j) % 2 == 0) {
-                    out.print(SET_BG_COLOR_LIGHT_BROWN);
-                } else {
-                    out.print(SET_BG_COLOR_DARK_BROWN);
-                }
+                configureSquare(out, i, j, positions);
                 if (board.board[i][j] == null) {
                     out.print(EMPTY);
                 } else {
