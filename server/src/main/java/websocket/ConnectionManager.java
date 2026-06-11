@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
-    public static final ConcurrentHashMap<Integer, List<Session>> connections = new ConcurrentHashMap<>();
-    private static Gson SERIALIZER = new Gson();
+    public static ConcurrentHashMap<Integer, List<Session>> connections = new ConcurrentHashMap<>();
+    private final static Gson SERIALIZER = new Gson();
 
     public void add(Integer gameId, Session session) {
         if (connections.containsKey(gameId)){

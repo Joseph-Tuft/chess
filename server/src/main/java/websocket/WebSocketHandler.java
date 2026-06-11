@@ -25,7 +25,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final UserDAO userDAO = DataAccessSelector.getUserDAO();
     private final AuthDAO authDAO = DataAccessSelector.getAuthDAO();
     private final GameDAO gameDAO = DataAccessSelector.getGameDAO();
-    private static Gson SERIALIZER = new Gson();
+    private final static Gson SERIALIZER = new Gson();
 
     @Override
     public void handleConnect(WsConnectContext ctx) {

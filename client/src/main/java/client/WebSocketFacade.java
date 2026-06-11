@@ -20,7 +20,7 @@ import java.net.URISyntaxException;
 public class WebSocketFacade extends Endpoint {
 
     Session session;
-    private final Gson SERIALIZER = new Gson();
+    private static final Gson SERIALIZER = new Gson();
     private ServerMessageObserver messageObserver;
 
     WebSocketFacade(String url, ServerMessageObserver messageObserver) throws DataAccessException {

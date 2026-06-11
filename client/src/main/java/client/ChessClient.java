@@ -27,7 +27,6 @@ public class ChessClient {
     private GameplayClient gameplayClient;
 
     private Map<String, Integer> gameMap = new HashMap<>();
-    private final Gson SERIALIZER = new Gson();
 
     public ChessClient(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
