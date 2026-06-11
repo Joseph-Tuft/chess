@@ -26,7 +26,7 @@ public class GameplayClient implements ServerMessageObserver {
     private int sessionID;
     private ChessGame currentGame = new ChessGame();
 
-    private final Gson SERIALIZER = new Gson();
+    private static final Gson SERIALIZER = new Gson();
     Scanner scanner = new Scanner(System.in);
 
     public GameplayClient(String serverUrl) throws DataAccessException {
