@@ -14,6 +14,9 @@ import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 
+import static ui.EscapeSequences.SET_TEXT_COLOR_BLACK;
+import static ui.EscapeSequences.SET_TEXT_COLOR_WHITE;
+
 public class GameplayClient implements ServerMessageObserver {
 
     private final WebSocketFacade ws;
@@ -31,10 +34,12 @@ public class GameplayClient implements ServerMessageObserver {
     public void notify(ServerMessage serverMessage){
         if (serverMessage instanceof LoadGame loadGame){
             currentGame = SERIALIZER.fromJson(loadGame.getMessage(), ChessGame.class);
+            System.out.println();
             DisplayGame display = new DisplayGame(currentGame, sessionColor);
             display.displayGame();
+        } else {
+            System.out.println(SET_TEXT_COLOR_BLACK + serverMessage.getMessage());
         }
-        System.out.print(serverMessage.getMessage());
     };
 
     public void connect(String authToken, int gameID, ChessGame.TeamColor color, Connect.ConnectorType connector){
@@ -42,13 +47,6 @@ public class GameplayClient implements ServerMessageObserver {
         sessionID = gameID;
         sessionColor = color;
         ws.connect(authToken, gameID, connector);
-    }
-
-    private String displayGame(Integer id, ChessGame.TeamColor color){
-        ChessGame game = new ChessGame();
-        DisplayGame display = new DisplayGame(game, color);
-        display.displayGame();
-        return "";
     }
 
     public String resign(){
@@ -66,14 +64,16 @@ public class GameplayClient implements ServerMessageObserver {
         if (pos == null || pos.length() != 2){
             throw new BadRequestException("Error: the position must be of the format ex: a2");
         }
-        if(pos.charAt(0) < 'a' || pos.charAt(0) > 'h' || pos.charAt(1) < 1 || pos.charAt(1) > 8){
+        if(pos.charAt(0) < 'a' || pos.charAt(0) > 'h' || pos.charAt(1) < '1' || pos.charAt(1) > '8'){
             throw new BadRequestException("Error: the position must be of the format ex: a2");
         }
         int col = pos.charAt(0) - 'a' + 1;
-        int row = pos.charAt(1);
+        int row = pos.charAt(1) - '0';
+        if (sessionColor.equals(ChessGame.TeamColor.WHITE)){
+            row = 9 - row;
+        }
         if (sessionColor.equals(ChessGame.TeamColor.BLACK)){
             col = 9 - col;
-            row = 9 - row;
         }
         return new ChessPosition(row, col);
     }

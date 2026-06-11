@@ -11,6 +11,6 @@ public class LoadGame extends ServerMessage{
 
     @Override
     public String getMessage(){
-        return this.getMessage();
+        return this.game;
     }
 }
