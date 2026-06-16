@@ -68,14 +68,17 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = authDAO.getAuthFromAuth(authToken).username();
             String message;
 
-            ChessGame game = gameDAO.getGame(gameID).game();
+            GameData gameData = gameDAO.getGame(gameID);
+            ChessGame game = gameData.game();
             String gameJson = SERIALIZER.toJson(game);
 
             LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, gameJson);
             connections.reply(session, loadGame);
 
+            String color = (username.equals(gameData.whiteUsername()) ? "white" : "black");
+
             if (connector == Connect.ConnectorType.PLAYER) {
-                message = String.format("%s has joined the game.", username);
+                message = String.format("%s has joined the game as %s.", username, color);
             } else {
                 message = String.format("%s is observing the game.", username);
             }
@@ -86,21 +89,40 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void checkCheckMate(int gameID, ChessGame game)throws IOException{
+    private boolean checkCheckMate(int gameID, ChessGame game, GameData gameData)throws IOException{
         // Broadcast checkmate and update game to game over
         Notification announceCheckmate;
         if (game.isInCheckmate(ChessGame.TeamColor.WHITE)){
             game.gameStatus = 1;
             gameDAO.makeMove(gameID, game);
             announceCheckmate = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,
-                    String.format("White is in checkmate, Black has won."));
+                    String.format("%s (white) is in checkmate, %s (black) has won.", gameData.whiteUsername(), gameData.blackUsername()));
             connections.broadcast(gameID, null, announceCheckmate);
+            return true;
         } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)){
             game.gameStatus = 1;
             gameDAO.makeMove(gameID, game);
             announceCheckmate = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,
-                    String.format("Black is in checkmate, White has won."));
+                    String.format("%s (black) is in checkmate, %s (white) has won.", gameData.blackUsername(), gameData.whiteUsername()));
             connections.broadcast(gameID, null, announceCheckmate);
+            return true;
+        }
+        return false;
+    }
+
+    private void checkCheck(int gameID, ChessGame game, GameData gameData)throws IOException{
+        // Broadcast checkmate and update game to game over
+        Notification announceCheck;
+        if (game.isInCheck(ChessGame.TeamColor.WHITE)){
+            gameDAO.makeMove(gameID, game);
+            announceCheck = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,
+                    String.format("%s (white) is in check.", gameData.whiteUsername()));
+            connections.broadcast(gameID, null, announceCheck);
+        } else if (game.isInCheck(ChessGame.TeamColor.BLACK)){
+            gameDAO.makeMove(gameID, game);
+            announceCheck = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,
+                    String.format("%s (black) is in check.", gameData.blackUsername()));
+            connections.broadcast(gameID, null, announceCheck);
         }
     }
 
@@ -154,7 +176,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(gameID, session, notification);
 
         // Broadcast checkmate and update game to game over
-        checkCheckMate(gameID, game);
+        if (!checkCheckMate(gameID, game, gameData)){
+            checkCheck(gameID, game, gameData);
+        }
+
     }
 
     private void leave(String authToken, Integer gameID, Session session) throws IOException{

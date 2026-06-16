@@ -39,7 +39,7 @@ public class GameplayClient implements ServerMessageObserver {
             System.out.println();
             DisplayGame display = new DisplayGame(currentGame, sessionColor);
             display.displayGame();
-            if (currentGame.gameStatus == 1) {
+            if (currentGame.gameStatus == 0) {
                 System.out.println(SET_TEXT_COLOR_BLACK + String.format("%s's turn",
                         (currentGame.turn.equals(ChessGame.TeamColor.WHITE) ? "White" : "Black")));
             }

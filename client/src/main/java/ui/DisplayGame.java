@@ -58,6 +58,7 @@ public class DisplayGame {
         }
         out.print(EMPTY);
         out.println(SET_BG_COLOR_WHITE);
+        out.print(SET_TEXT_COLOR_BLACK);
     }
 
     private void configureSquare(PrintStream out, int i, int j, Collection<ChessPosition> positions, ChessPosition startPos){
